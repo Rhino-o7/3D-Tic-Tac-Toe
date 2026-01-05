@@ -15,34 +15,37 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\board.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NetworkMessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
+    <ClInclude Include="xPCH\framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="xPCH\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="include\board.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NetworkMessage.h">
+    <ClInclude Include="include\network_message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Game.h">
+    <ClInclude Include="include\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="xPCH\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\board.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\network_message.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

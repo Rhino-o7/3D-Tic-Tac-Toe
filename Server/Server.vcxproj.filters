@@ -15,21 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Server.cpp">
+    <ClCompile Include="src\Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WebSocketServer.cpp">
+    <ClCompile Include="src\AI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GameSession.cpp">
+    <ClCompile Include="src\GameSession.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WebSocketServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WebSocketServer.h">
+    <ClInclude Include="src\AI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameSession.h">
+    <ClInclude Include="src\GameSession.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WebSocketServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

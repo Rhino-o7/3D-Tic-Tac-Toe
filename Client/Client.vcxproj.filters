@@ -15,18 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\client.cpp">
+    <ClCompile Include="src\ConsoleClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WebSocketClient.cpp">
+    <ClCompile Include="src\WebsocketClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Client.cpp">
+    <ClCompile Include="src\Client.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="WebSocketClient.h">
+    <ClInclude Include="src\ConsoleClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WebsocketClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

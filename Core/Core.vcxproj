@@ -18,23 +18,10 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="pch.cpp" />
-    <ClCompile Include="src\board.cpp" />
-    <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\NetworkMessage.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\framework.h" />
-    <ClInclude Include="include\board.h" />
-    <ClInclude Include="include\Game.h" />
-    <ClInclude Include="include\NetworkMessage.h" />
-    <ClInclude Include="include\pch.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{3e21f306-d7ad-44e4-bdf6-9968d3132d45}</ProjectGuid>
+    <ProjectGuid>{02f3937b-3fea-43a8-8551-72c1dc2b3ff8}</ProjectGuid>
     <RootNamespace>Core</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -126,7 +113,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -143,8 +130,9 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Core\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -152,6 +140,25 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="include\game.h" />
+    <ClInclude Include="include\network_message.h" />
+    <ClInclude Include="xPCH\framework.h" />
+    <ClInclude Include="include\board.h" />
+    <ClInclude Include="include\Core.h" />
+    <ClInclude Include="xPCH\pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\network_message.cpp" />
+    <ClCompile Include="xPCH\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\board.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -1,6 +1,7 @@
 #include "WebsocketClient.h"
+#include <iostream>
 
-
+// placeholders 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
@@ -36,7 +37,7 @@ WebSocketClient::~WebSocketClient() {
 void WebSocketClient::connect(const std::string& uri) {
 	try {
 		std::cout << "WebSocketClient: Attempting to connect to " << uri << std::endl;
-
+		//check for error
 		websocketpp::lib::error_code ec;
 		WebSocketClientType::connection_ptr con = client.get_connection(uri, ec);
 
@@ -48,7 +49,7 @@ void WebSocketClient::connect(const std::string& uri) {
 		connectionHandle = con->get_handle();
 		client.connect(con);
 
-		// Start ASIO in a separate thread
+		// Start ASIO in thread
 		asioThread = std::thread([this]() {
 			std::cout << "ASIO thread started" << std::endl;
 			try {
@@ -74,6 +75,7 @@ void WebSocketClient::disconnect() {
 		websocketpp::lib::error_code ec;
 		client.close(connectionHandle, websocketpp::close::status::normal, "Client disconnecting", ec);
 
+		//error
 		if (ec) {
 			std::cerr << "Disconnect error: " << ec.message() << std::endl;
 		}
@@ -83,6 +85,7 @@ void WebSocketClient::disconnect() {
 
 	client.stop();
 
+	// end thread
 	if (asioThread.joinable()) {
 		asioThread.join();
 	}
@@ -152,7 +155,7 @@ void WebSocketClient::onFail(ConnectionHandle hdl) {
 		onDisconnectCallback();
 	}
 }
-
+// Set Callbacks
 void WebSocketClient::setOnMessageCallback(std::function<void(const NetworkMessage&)> callback) {
 	onMessageCallback = callback;
 }

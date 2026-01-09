@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+// Placeholders
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
@@ -84,18 +85,8 @@ void WebSocketServer::sendMessage(ConnectionHandle hdl, const NetworkMessage& ms
 	}
 }
 
-void WebSocketServer::broadcastMessage(const NetworkMessage& msg) {
-	std::string serialized = msg.serialize();
-	for (auto& conn : connections) {
-		try {
-			server.send(conn, serialized, websocketpp::frame::opcode::text);
-		}
-		catch (const std::exception& e) {
-			std::cerr << "Error broadcasting to connection: " << e.what() << std::endl;
-		}
-	}
-}
 
+// Callbacks
 void WebSocketServer::setOnMessageCallback(std::function<void(ConnectionHandle, const NetworkMessage&)> callback) {
 	onMessageCallback = callback;
 }

@@ -1,18 +1,16 @@
 #pragma once
-#include <atomic>
 #include <mutex>
 #include "board.h"
-#include "websocketClient.h"
+#include "WebsocketClient.h"
 
 class ConsoleClient {
 private:
 	Player player;
-	WebSocketClient client;
+	std::unique_ptr<WebSocketClient> client;
 	void onConnect();
 	void onDisconnect();
 	void onMessage(const NetworkMessage& msg);
 	bool connected;
-	int timeoutTime{ 5000 }; 
 
 	// State management
 	std::mutex stateMutex;
@@ -20,6 +18,8 @@ private:
 	bool hasState{ false };
 	bool waitingForTurn{ false };
 	bool running{ false };
+
+	static constexpr int timeoutTime = 5000;
 
 	// Helpers
 	void sendPlayerChoice(Player choice);

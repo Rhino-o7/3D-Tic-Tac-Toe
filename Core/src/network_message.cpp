@@ -8,7 +8,8 @@ std::string NetworkMessage::serialize() const {
 	std::ostringstream oss;
 	oss << static_cast<int>(msg_type) << "|" << payload.size() << "|" << payload;
 	return oss.str();
-	// "2|12|X,1,2,3" <- (MessageType=2, length=12, data="X,1,2,3")
+
+	// "2|12|X,1,2,3,..." <- (MessageType=2, length=12, data="X,1,2,3...")
 }
 
 NetworkMessage NetworkMessage::deserialize(const std::string& data) {
@@ -17,10 +18,9 @@ NetworkMessage NetworkMessage::deserialize(const std::string& data) {
 	size_t payloadSize;
 	char delimiter;
 	
-	// Parse: messageType|payloadSize|payload
+	// messageType|payloadSize|payload
 	iss >> msgTypeInt >> delimiter >> payloadSize >> delimiter;
 
-	// Check errors
 	if (iss.fail()) {
 		throw std::runtime_error("Failed to parse message header");
 	}
@@ -45,7 +45,7 @@ NetworkMessage NetworkMessage::createMoveMessage(const MoveData& move) {
 NetworkMessage NetworkMessage::createGameStateMessage(const GameStateData& state) {
 	std::ostringstream oss;
 
-	// Serialize the 3x3x3 board
+	// board
 	for (int x = 0; x < 3; x++) {
 		for (int y = 0; y < 3; y++) {
 			for (int z = 0; z < 3; z++) {
@@ -70,6 +70,8 @@ NetworkMessage NetworkMessage::createPlayerChoiceMessage(Player choice) {
 NetworkMessage NetworkMessage::createErrorMessage(const std::string& error) {
 	return NetworkMessage(MessageType::ERROR_MSG, error);
 }
+
+
 
 // Parsing functions
 
@@ -96,14 +98,14 @@ MoveData NetworkMessage::parseMoveData() const {
 
 GameStateData NetworkMessage::parseGameStateData() const {
 	if (msg_type != MessageType::GAME_STATE) {
-		throw std::runtime_error("Cannot parse GameStateData from non-GAME_STATE message");
+		throw std::runtime_error(" Trying to parseGameStateData() a not GAME_STATE message");
 	}
 
 	std::istringstream iss(payload);
 	GameStateData state;
 	char comma, pipe;
 
-	// Parse 3x3x3 board
+	// Parse board
 	for (int x = 0; x < 3; x++) {
 		for (int y = 0; y < 3; y++) {
 			for (int z = 0; z < 3; z++) {
@@ -119,7 +121,7 @@ GameStateData NetworkMessage::parseGameStateData() const {
 		}
 	}
 
-	// Parse game state info
+	// Parse game state
 	int currentTurnInt, gameOverInt, winnerInt;
 	iss >> pipe >> currentTurnInt >> pipe >> gameOverInt >> pipe >> winnerInt;
 

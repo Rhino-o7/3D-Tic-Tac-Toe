@@ -20,11 +20,9 @@ public:
 	void init(uint16_t port);
 	void run();
 	void stop();
-
 	void sendMessage(ConnectionHandle hdl, const NetworkMessage& msg);
-	void broadcastMessage(const NetworkMessage& msg);
 
-	// Callback setters
+	// Callbacks
 	void setOnMessageCallback(std::function<void(ConnectionHandle, const NetworkMessage&)> callback);
 	void setOnConnectCallback(std::function<void(ConnectionHandle)> callback);
 	void setOnDisconnectCallback(std::function<void(ConnectionHandle)> callback);

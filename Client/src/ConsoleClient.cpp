@@ -1,12 +1,13 @@
 #include <iostream>
 #include <limits>
 #include <thread>
-//#include <chrono>
 #include "ConsoleClient.h"
 
 using namespace std;
 
-ConsoleClient::ConsoleClient() : player(Player::X), connected(false) {}
+ConsoleClient::ConsoleClient() : player(Player::X), connected(false) {
+	client = std::make_unique<WebSocketClient>();
+}
 
 void ConsoleClient::onConnect() {
 	std::cout << "Connected to server." << std::endl;
@@ -43,14 +44,18 @@ void ConsoleClient::onMessage(const NetworkMessage& msg) {
 	}
 }
 
-bool ConsoleClient::connectToServer(const std::string& uri) {
+bool ConsoleClient::connectToServer(const std::string& uri) { 
 	try {
-		client.setOnConnectCallback([this]() { onConnect(); });
-		client.setOnDisconnectCallback([this]() { onDisconnect(); });
-		client.setOnMessageCallback([this](const NetworkMessage& msg) { onMessage(msg); });
+		// create new client socket ptr
+		client = std::make_unique<WebSocketClient>();
+		
+		client->setOnConnectCallback([this]() { onConnect(); });
+		client->setOnDisconnectCallback([this]() { onDisconnect(); });
+		client->setOnMessageCallback([this](const NetworkMessage& msg) { onMessage(msg); });
 
-		client.connect(uri);
+		client->connect(uri);
 
+		// wait for connection or timeout
 		int timeout = timeoutTime; 
 		while (!connected && timeout > 0) {
 			std::cout << "Waiting for connection..." << std::endl;
@@ -62,6 +67,7 @@ bool ConsoleClient::connectToServer(const std::string& uri) {
 			return false;
 		}
 
+		//Player pick X or O
 		while (true) {
 			std::cout << "Choose your side (X/O): ";
 			char c;
@@ -86,6 +92,7 @@ bool ConsoleClient::connectToServer(const std::string& uri) {
 
 		std::cout << "Waiting for game state..." << std::endl;
 
+		// Game loop
 		running = true;
 		while (running) {
 			if (!connected) {
@@ -105,6 +112,27 @@ bool ConsoleClient::connectToServer(const std::string& uri) {
 
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
+
+		// disconnect
+		if (connected) {
+			client->disconnect();
+		}
+
+		// replay
+		std::cout << "\nPlay again? (Y/N): ";
+		char playAgain;
+		if (cin >> playAgain) {
+			playAgain = static_cast<char>(toupper(static_cast<unsigned char>(playAgain)));
+			if (playAgain == 'Y') {
+				// Reset state and reconnect
+				{
+					std::lock_guard<std::mutex> lock(stateMutex);
+					hasState = false;
+					waitingForTurn = false;
+				}
+				return connectToServer(uri);
+			}
+		}
 	}
 	catch (const std::exception& e) {
 		cerr << "Error setting up connection: " << e.what() << endl;
@@ -115,7 +143,7 @@ bool ConsoleClient::connectToServer(const std::string& uri) {
 
 void ConsoleClient::sendPlayerChoice(Player choice) {
 	NetworkMessage choiceMsg = NetworkMessage::createPlayerChoiceMessage(choice);
-	client.sendMessage(choiceMsg);
+	client->sendMessage(choiceMsg);
 }
 
 void ConsoleClient::promptAndSendMove() {
@@ -148,34 +176,32 @@ void ConsoleClient::promptAndSendMove() {
 	std::cout << "Your Move: " << x << " " << y << " " << z << std::endl;
 
 	MoveData move{ player, x, y, z };
-	client.sendMessage(NetworkMessage::createMoveMessage(move));
-
-	{
-		std::lock_guard<std::mutex> lock(stateMutex);
-		waitingForTurn = false;
-	}
+	client->sendMessage(NetworkMessage::createMoveMessage(move));
 }
 
 void ConsoleClient::handleGameState(const GameStateData& state) {
-	{
-		std::lock_guard<std::mutex> lock(stateMutex);
-		lastState = state;
-		hasState = true;
-		waitingForTurn = (!state.game_over && state.current_turn == player);
-	}
+	bool isGameOver = false;
+	Player winner = Player::NONE;
+
+	
+	std::lock_guard<std::mutex> lock(stateMutex);
+	lastState = state;
+	hasState = true;
+	waitingForTurn = (!state.game_over && state.current_turn == player);
+	isGameOver = state.game_over;
+	winner = state.winner;
+	
 
 	printBoard(state);
 
-	if (state.game_over) {
-		if (state.winner == Player::NONE) {
+	// end game
+	if (isGameOver) {
+		if (winner == Player::NONE) {
 			std::cout << "Game over: Draw.\n";
 		} else {
-			std::cout << "Game over: " << (state.winner == Player::X ? "X" : "O") << " wins.\n";
+			std::cout << "Game over: " << (winner == Player::X ? "X" : "O") << " wins.\n";
 		}
 		running = false;
-
-		//  close to avoid 10054 on the server
-		client.disconnect();
 		return;
 	}
 

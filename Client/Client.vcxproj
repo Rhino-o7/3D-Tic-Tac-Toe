@@ -139,12 +139,33 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Client.cpp" />
+    <ClCompile Include="src\rendering\Shader.cpp" />
     <ClCompile Include="src\ConsoleClient.cpp" />
+    <ClCompile Include="src\rendering\IndexBuffer.cpp" />
+    <ClCompile Include="src\rendering\Renderer.cpp" />
+    <ClCompile Include="src\rendering\Texture.cpp" />
+    <ClCompile Include="src\rendering\VertexArray.cpp" />
+    <ClCompile Include="src\rendering\VertexBuffer.cpp" />
+    <ClCompile Include="src\stb\stb_image.cpp" />
     <ClCompile Include="src\WebsocketClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\rendering\Shader.h" />
     <ClInclude Include="src\ConsoleClient.h" />
+    <ClInclude Include="src\rendering\IndexBuffer.h" />
+    <ClInclude Include="src\rendering\Renderer.h" />
+    <ClInclude Include="src\rendering\VertexArray.h" />
+    <ClInclude Include="src\rendering\VertexBuffer.h" />
+    <ClInclude Include="src\rendering\VertexBufferLayout.h" />
+    <ClInclude Include="src\stb\stb_image.h" />
     <ClInclude Include="src\WebsocketClient.h" />
+    <ClInclude Include="src\rendering\Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shaders\Basic.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\textures\ryo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

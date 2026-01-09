@@ -143,20 +143,11 @@
   <ItemGroup>
     <ClInclude Include="include\game.h" />
     <ClInclude Include="include\network_message.h" />
-    <ClInclude Include="xPCH\framework.h" />
     <ClInclude Include="include\board.h" />
-    <ClInclude Include="include\Core.h" />
-    <ClInclude Include="xPCH\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\network_message.cpp" />
-    <ClCompile Include="xPCH\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\board.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

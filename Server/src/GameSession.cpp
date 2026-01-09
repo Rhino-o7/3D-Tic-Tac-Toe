@@ -1,7 +1,5 @@
 #include "GameSession.h"
 
-#include <iostream>
-
 GameSession::GameSession(WebSocketServer& server, ConnectionHandle clientHandle)
 	: server(server), client(clientHandle) {
 }
@@ -24,14 +22,14 @@ void GameSession::handleMessage(const NetworkMessage& msg) {
 
 void GameSession::handleDisconnect() {
 	std::lock_guard<std::mutex> lock(sessionMutex);
-	// Place any per-session cleanup you need here.
 }
 
-void GameSession::handlePlayerChoice(Player choice) {
+void GameSession::handlePlayerChoice(Player choice) { // Sets the X and O of Player and AI
 	if (choice == Player::NONE) {
 		server.sendMessage(client, NetworkMessage::createErrorMessage("Invalid player choice"));
 		return;
 	}
+
 
 	clientPlayer = choice;
 	aiPlayer = (choice == Player::X) ? Player::O : Player::X;
@@ -39,31 +37,27 @@ void GameSession::handlePlayerChoice(Player choice) {
 	game = std::make_unique<Game>(clientPlayer);
 	ai = std::make_unique<AI>(aiPlayer, &game->getBoard(), 5);
 
-	// X always starts; if AI is X, let it move immediately.
+	// Check who goes first
 	if (game->getCurrentTurn() == aiPlayer) {
 		makeAiTurn();
 	} else {
 		sendGameState();
 	}
+
 }
 
 void GameSession::handleMove(const MoveData& move) {
+	// Check for errors
 	if (!game) {
 		server.sendMessage(client, NetworkMessage::createErrorMessage("Game not initialized; choose a player first."));
 		return;
 	}
-
-	if (move.player != clientPlayer) {
-		server.sendMessage(client, NetworkMessage::createErrorMessage("It is not your side."));
+	if (move.player != clientPlayer || game->getCurrentTurn() != clientPlayer) {
+		server.sendMessage(client, NetworkMessage::createErrorMessage("Error! Not client turn"));
 		return;
 	}
 
-	if (game->getCurrentTurn() != clientPlayer) {
-		server.sendMessage(client, NetworkMessage::createErrorMessage("Not your turn."));
-		return;
-	}
-
-	// Let the caller fill in real game logic; this just forwards the move.
+	// Check for move error and apply move
 	const bool applied = game->takeTurn(move.player, move.x, move.y, move.z);
 	if (!applied) {
 		server.sendMessage(client, NetworkMessage::createErrorMessage("Invalid move"));
@@ -72,7 +66,7 @@ void GameSession::handleMove(const MoveData& move) {
 
 	sendGameState();
 
-	// If the game continues and it's now the AI's turn, let AI play.
+	// Ai turn
 	if (!game->isGameOver() && game->getCurrentTurn() == aiPlayer) {
 		makeAiTurn();
 	}
@@ -83,6 +77,7 @@ void GameSession::makeAiTurn() {
 		return;
 	}
 
+	// apply ai best move
 	auto [x, y, z] = ai->getBestMove();
 	const bool applied = game->takeTurn(aiPlayer, x, y, z);
 	if (!applied) {

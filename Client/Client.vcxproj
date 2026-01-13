@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_WEBSOCKETPP_CPP11_STL_;_WIN32_WINNT=0x0601;ASIO_STANDALONE;GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,7 +123,7 @@
       <PreprocessorDefinitions>_WEBSOCKETPP_CPP11_STL_;_WIN32_WINNT=0x0601;ASIO_STANDALONE;GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,15 +138,23 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Client.cpp" />
     <ClCompile Include="src\rendering\Shader.cpp" />
     <ClCompile Include="src\ConsoleClient.cpp" />
     <ClCompile Include="src\rendering\IndexBuffer.cpp" />
     <ClCompile Include="src\rendering\Renderer.cpp" />
+    <ClCompile Include="src\rendering\TestGL.cpp" />
     <ClCompile Include="src\rendering\Texture.cpp" />
     <ClCompile Include="src\rendering\VertexArray.cpp" />
     <ClCompile Include="src\rendering\VertexBuffer.cpp" />
-    <ClCompile Include="src\stb\stb_image.cpp" />
+    <ClCompile Include="src\tests\TestClearColor.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\vendor\stb\stb_image.cpp" />
     <ClCompile Include="src\WebsocketClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -157,7 +165,18 @@
     <ClInclude Include="src\rendering\VertexArray.h" />
     <ClInclude Include="src\rendering\VertexBuffer.h" />
     <ClInclude Include="src\rendering\VertexBufferLayout.h" />
-    <ClInclude Include="src\stb\stb_image.h" />
+    <ClInclude Include="src\tests\Test.h" />
+    <ClInclude Include="src\tests\TestClearColor.h" />
+    <ClInclude Include="src\vendor\imgui\imconfig.h" />
+    <ClInclude Include="src\vendor\imgui\imgui.h" />
+    <ClInclude Include="src\vendor\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="src\vendor\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="src\vendor\imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="src\vendor\imgui\imgui_internal.h" />
+    <ClInclude Include="src\vendor\imgui\imstb_rectpack.h" />
+    <ClInclude Include="src\vendor\imgui\imstb_textedit.h" />
+    <ClInclude Include="src\vendor\imgui\imstb_truetype.h" />
+    <ClInclude Include="src\vendor\stb\stb_image.h" />
     <ClInclude Include="src\WebsocketClient.h" />
     <ClInclude Include="src\rendering\Texture.h" />
   </ItemGroup>

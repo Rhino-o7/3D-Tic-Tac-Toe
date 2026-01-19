@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>_WEBSOCKETPP_CPP11_STL_;_WIN32_WINNT=0x0601;ASIO_STANDALONE;GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src;C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,7 +123,7 @@
       <PreprocessorDefinitions>_WEBSOCKETPP_CPP11_STL_;_WIN32_WINNT=0x0601;ASIO_STANDALONE;GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src;C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +138,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\voxel\ChunkRenderer.cpp" />
+    <ClCompile Include="src\rendering\Camera.cpp" />
+    <ClCompile Include="src\voxel\ChunkBuilder.cpp" />
+    <ClCompile Include="src\voxel\ChunkMesh.cpp" />
+    <ClCompile Include="src\voxel\Chunk.cpp" />
     <ClCompile Include="src\rendering\Shader.cpp" />
     <ClCompile Include="src\ConsoleClient.cpp" />
     <ClCompile Include="src\rendering\IndexBuffer.cpp" />
@@ -146,7 +151,11 @@
     <ClCompile Include="src\rendering\Texture.cpp" />
     <ClCompile Include="src\rendering\VertexArray.cpp" />
     <ClCompile Include="src\rendering\VertexBuffer.cpp" />
+    <ClCompile Include="src\tests\Test.cpp" />
+    <ClCompile Include="src\tests\Test3D.cpp" />
+    <ClCompile Include="src\tests\TestChunk.cpp" />
     <ClCompile Include="src\tests\TestClearColor.cpp" />
+    <ClCompile Include="src\tests\TestTexture.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_draw.cpp" />
@@ -155,9 +164,17 @@
     <ClCompile Include="src\vendor\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\vendor\stb\stb_image.cpp" />
+    <ClCompile Include="src\voxel\TextureAtlas.cpp" />
     <ClCompile Include="src\WebsocketClient.cpp" />
+    <ClCompile Include="src\voxel\Voxel.cpp" />
+    <ClCompile Include="src\VoxelClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\voxel\ChunkRenderer.h" />
+    <ClInclude Include="src\rendering\Camera.h" />
+    <ClInclude Include="src\voxel\ChunkBuilder.h" />
+    <ClInclude Include="src\voxel\ChunkMesh.h" />
+    <ClInclude Include="src\voxel\Chunk.h" />
     <ClInclude Include="src\rendering\Shader.h" />
     <ClInclude Include="src\ConsoleClient.h" />
     <ClInclude Include="src\rendering\IndexBuffer.h" />
@@ -166,7 +183,10 @@
     <ClInclude Include="src\rendering\VertexBuffer.h" />
     <ClInclude Include="src\rendering\VertexBufferLayout.h" />
     <ClInclude Include="src\tests\Test.h" />
+    <ClInclude Include="src\tests\Test3D.h" />
+    <ClInclude Include="src\tests\TestChunk.h" />
     <ClInclude Include="src\tests\TestClearColor.h" />
+    <ClInclude Include="src\tests\TestTexture.h" />
     <ClInclude Include="src\vendor\imgui\imconfig.h" />
     <ClInclude Include="src\vendor\imgui\imgui.h" />
     <ClInclude Include="src\vendor\imgui\imgui_impl_glfw.h" />
@@ -177,8 +197,11 @@
     <ClInclude Include="src\vendor\imgui\imstb_textedit.h" />
     <ClInclude Include="src\vendor\imgui\imstb_truetype.h" />
     <ClInclude Include="src\vendor\stb\stb_image.h" />
+    <ClInclude Include="src\voxel\TextureAtlas.h" />
     <ClInclude Include="src\WebsocketClient.h" />
     <ClInclude Include="src\rendering\Texture.h" />
+    <ClInclude Include="src\voxel\Voxel.h" />
+    <ClInclude Include="src\VoxelClient.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />

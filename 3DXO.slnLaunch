@@ -6,6 +6,10 @@
         "Path": "Client\\Client.vcxproj",
         "Action": "Start",
         "DebugTarget": "Local Windows Debugger"
+      },
+      {
+        "Path": "Server\\Server.vcxproj",
+        "Action": "StartWithoutDebugging"
       }
     ]
   }

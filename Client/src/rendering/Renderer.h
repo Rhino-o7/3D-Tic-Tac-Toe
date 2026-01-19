@@ -7,12 +7,11 @@
 
 #define ASSERT(x) if(!(x)) __debugbreak();
 
-class Renderer {
+static class Renderer {
 private:
 
-public:
-	void Clear() const;
-	void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
+public: 
+	static void Clear() ;
+	static void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) ;
 };
-
 

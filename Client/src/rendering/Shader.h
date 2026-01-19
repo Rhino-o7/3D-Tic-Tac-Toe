@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <glm.hpp>
+#include <unordered_map>
 
 struct ShaderProgramSource {
     std::string VertexSource;
@@ -12,7 +13,7 @@ class Shader {
 private:
     std::string m_FilePath;
     unsigned int m_RendererID;
-	std::unordered_map<std::string, int> m_UniformLocationCache;
+	mutable std::unordered_map<std::string, int> m_UniformLocationCache;
 
     int GetUniformLocation(const std::string& name);
     unsigned int CreateShader(const std::string& vertShader, const std::string& fragShader);

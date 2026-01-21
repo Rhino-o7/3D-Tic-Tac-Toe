@@ -70,6 +70,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\Client</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\Client</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\Client</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\Client</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -105,14 +113,17 @@
       <PreprocessorDefinitions>_WEBSOCKETPP_CPP11_STL_;_WIN32_WINNT=0x0601;ASIO_STANDALONE;GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src;C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\glm;$(ProjectDir)src;$(ProjectDir)src\vendor\imgui;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(ProjectDir)src\vendor\GLEW\include;$(ProjectDir)src\vendor\GLFW\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\GLFW\lib-vc2022;$(SolutionDir)dep\GLEW\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\vendor\GLFW\lib-vc2022;$(ProjectDir)src\vendor\GLEW\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /E /Y /I "$(ProjectDir)res" "$(OutDir)res\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -123,14 +134,17 @@
       <PreprocessorDefinitions>_WEBSOCKETPP_CPP11_STL_;_WIN32_WINNT=0x0601;ASIO_STANDALONE;GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Dev\GitRepos\3dXO\Client\src;C:\Dev\GitRepos\3dXO\Client\src\vendor\imgui;C:\Dev\GitRepos\3dXO\dep\glm;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(SolutionDir)dep\GLEW\include;$(SolutionDir)dep\GLFW\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\vendor\glm;$(ProjectDir)src;$(ProjectDir)src\vendor\imgui;$(SolutionDir)dep\asio-1.12.1\include;$(SolutionDir)dep\websocketpp-0.8.2;$(SolutionDir)\Core\include;$(ProjectDir)src\vendor\GLEW\include;$(ProjectDir)src\vendor\GLFW\include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)dep\GLFW\lib-vc2022;$(SolutionDir)dep\GLEW\lib\Release\x64;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)src\vendor\GLFW\lib-vc2022;$(ProjectDir)src\vendor\GLEW\lib\Release\x64;</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /E /Y /I "$(ProjectDir)res" "$(OutDir)res\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.vcxproj">
@@ -138,6 +152,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\voxel\ChunkRenderer.cpp" />
     <ClCompile Include="src\rendering\Camera.cpp" />
     <ClCompile Include="src\voxel\ChunkBuilder.cpp" />
@@ -147,7 +163,6 @@
     <ClCompile Include="src\ConsoleClient.cpp" />
     <ClCompile Include="src\rendering\IndexBuffer.cpp" />
     <ClCompile Include="src\rendering\Renderer.cpp" />
-    <ClCompile Include="src\rendering\TestGL.cpp" />
     <ClCompile Include="src\rendering\Texture.cpp" />
     <ClCompile Include="src\rendering\VertexArray.cpp" />
     <ClCompile Include="src\rendering\VertexBuffer.cpp" />
@@ -170,6 +185,7 @@
     <ClCompile Include="src\VoxelClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Application.h" />
     <ClInclude Include="src\voxel\ChunkRenderer.h" />
     <ClInclude Include="src\rendering\Camera.h" />
     <ClInclude Include="src\voxel\ChunkBuilder.h" />
@@ -204,6 +220,7 @@
     <ClInclude Include="src\VoxelClient.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="emccBuild.bat" />
     <None Include="res\shaders\Basic.shader" />
   </ItemGroup>
   <ItemGroup>

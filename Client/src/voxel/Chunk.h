@@ -1,7 +1,7 @@
 #pragma once
 #include "Voxel.h"
 #include <vector>
-#include <board.h>
+#include "board.h"
 
 
 
@@ -25,8 +25,11 @@ public:
 	int GetSizeZ() const { return m_SizeZ; }
 
 	void SetChunkAll(VoxelType type);
+	void SetChunkHover();
+	void ClearChunkHover();
 	void SetChunkSolid();
 	void SetChunkSomeSolid();
+	void ClearButBorder();
 
 	void SetChunkGame(int borderWidth, int chunkX, int chunkY, int chunkZ);
 	void SetChunkBorder(int borderWidth);

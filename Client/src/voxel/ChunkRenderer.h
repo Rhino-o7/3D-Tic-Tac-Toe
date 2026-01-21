@@ -41,6 +41,9 @@ public:
 
 	void SetAspectRatio(float aspectRatio);
 	
+	// Camera access for raycasting
+	const Camera& GetCamera() const { return m_Camera; }
+	
 	// Texture atlas management
 	TextureAtlas& GetTextureAtlas() { return m_TextureAtlas; }
 

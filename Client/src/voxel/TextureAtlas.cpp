@@ -19,7 +19,7 @@ void TextureAtlas::Initialize(const std::string& atlasPath, int tilesX, int tile
 	m_VoxelTextureMap[VoxelType::Solid] = defaultCoords;
 	m_VoxelTextureMap[VoxelType::X] = defaultCoords;
 	m_VoxelTextureMap[VoxelType::O] = defaultCoords;
-	m_VoxelTextureMap[VoxelType::Other] = defaultCoords;
+	m_VoxelTextureMap[VoxelType::Hover] = defaultCoords;
 }
 
 void TextureAtlas::MapVoxelTexture(VoxelType type, int tileX, int tileY)

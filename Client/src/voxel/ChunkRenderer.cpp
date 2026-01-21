@@ -62,7 +62,7 @@ void ChunkRenderer::EnsurePipeline()
 		m_TextureAtlas.MapVoxelTexture(VoxelType::Solid, 0, 0); // Top-left
 		m_TextureAtlas.MapVoxelTexture(VoxelType::X, 1, 0);     // Top-right
 		m_TextureAtlas.MapVoxelTexture(VoxelType::O, 0, 1);     // Bottom-left
-		m_TextureAtlas.MapVoxelTexture(VoxelType::Other, 1, 1); // Bottom-right
+		m_TextureAtlas.MapVoxelTexture(VoxelType::Hover, 1, 1); // Bottom-right
 		
 		m_Shader->SetUniform1i("u_Texture", 0);
 	}

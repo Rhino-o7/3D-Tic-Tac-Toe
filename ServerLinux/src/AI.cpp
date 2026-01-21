@@ -4,7 +4,6 @@
 #include <tuple>
 #include <limits>
 #include <iostream>
-#include <random> // ADD THIS
 
 constexpr int MAX_DEPTH = 2;
 constexpr int WIN_SCORE = 100;
@@ -93,15 +92,8 @@ std::tuple<int, int, int> AI::getBestMove() {
         }
     }
 
-    std::vector<int> indices(27);
-    for (int i = 0; i < 27; ++i) indices[i] = i;
-
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(indices.begin(), indices.end(), g);
-
     // Minimax
-    for (int idx : indices) {
+    for (int idx = 0; idx < 27; ++idx) {
         int x, y, z; toXYZ(idx, x, y, z);
         if (tmpBoard.getCell(x, y, z) == Player::NONE) {
             Board candidateBoard(tmpBoard);

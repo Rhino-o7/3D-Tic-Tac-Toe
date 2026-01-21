@@ -195,6 +195,11 @@ void VoxelClient::StartGameLoop()
 	}
 }
 
+void VoxelClient::StopGameLoop()
+{
+	running = false;
+}
+
 bool VoxelClient::connectToServer(const std::string & uri)
 {
 	try {

@@ -8,7 +8,7 @@ enum class VoxelType : std::uint8_t
 	Solid,
     X,
     O,
-	Other
+	Hover
 };
 
 struct VoxelNeighbors

@@ -32,6 +32,39 @@ void Chunk::SetChunkAll(VoxelType type)
 	}
 }
 
+void Chunk::SetChunkHover()
+{
+	for (int x = 0; x < m_SizeX; ++x)
+	{
+		for (int y = 0; y < m_SizeZ; ++y)
+		{
+			for (int z = 0; z < m_SizeY; ++z)
+			{
+				if (GetIndex(x,y,z) == VoxelType::Air) {
+					SetIndex(x, y, z, VoxelType::Hover);
+				}
+				
+			}
+		}
+	}
+}
+
+void Chunk::ClearChunkHover()
+{
+	for (int x = 0; x < m_SizeX; ++x)
+	{
+		for (int y = 0; y < m_SizeZ; ++y)
+		{
+			for (int z = 0; z < m_SizeY; ++z)
+			{
+				if (GetIndex(x, y, z) == VoxelType::Hover) {  // Changed from VoxelType::Air
+					SetIndex(x, y, z, VoxelType::Air);
+				}
+			}
+		}
+	}
+}
+
 void Chunk::SetChunkSolid()
 {
 	for (int x = 0; x < m_SizeX; ++x)
@@ -59,6 +92,12 @@ void Chunk::SetChunkSomeSolid()
 			}
 		}
 	}
+}
+
+void Chunk::ClearButBorder()
+{
+	SetChunkAll(VoxelType::Air);
+	SetChunkBorder(m_BorderWidth);
 }
 
 void Chunk::SetChunkGame(int borderWidth, int chunkX, int chunkY, int chunkZ)
@@ -260,6 +299,10 @@ VoxelNeighbors Chunk::GetNeighbors(int index) const
 	neighbors.top = (y < m_SizeY - 1) ? GetIndex(x, y + 1, z) : VoxelType::Air;
 	return neighbors;
 }
+
+
+
+
 
 
 

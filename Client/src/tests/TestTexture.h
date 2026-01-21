@@ -1,10 +1,12 @@
 #pragma once
+#include <glm.hpp>
 #include "rendering/VertexBuffer.h"
 #include "rendering/VertexBufferLayout.h"
 #include "rendering/Texture.h"
 #include "rendering/VertexArray.h"
 #include <memory>
 #include "Test.h"
+
 namespace Test {
 	
 	class TestTexture : public Test {
@@ -19,9 +21,9 @@ namespace Test {
 	public:
 		TestTexture();
 		~TestTexture();
+
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
 	};
-	
 }

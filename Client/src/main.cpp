@@ -13,12 +13,8 @@
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
 #include "imgui.h"
-#include "Renderer.h"
-
-#include "tests/TestClearColor.h"
-#include "tests/TestTexture.h"
-#include "tests/Test3D.h"
-#include "tests/TestChunk.h"
+#include "rendering/Renderer.h"
+#include "Application.h"
 
 const int WINDOW_WIDTH = 2000;
 const int WINDOW_HEIGHT = 1000;
@@ -40,8 +36,7 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
 struct AppState {
     GLFWwindow* window;
     Renderer* renderer;
-    Test::Test** currentTest;  // Pointer to pointer so we can see updates
-    Test::TestMenu* testMenu;
+    Application* app;
 };
 
 AppState* g_appState = nullptr;
@@ -53,17 +48,10 @@ void main_loop() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-    if (*g_appState->currentTest) {
-        (*g_appState->currentTest)->OnUpdate(0.0f);
-        (*g_appState->currentTest)->OnRender();
-        ImGui::Begin("Test");
-        if (*g_appState->currentTest != g_appState->testMenu && ImGui::Button("<-")) {
-            delete *g_appState->currentTest;
-            *g_appState->currentTest = g_appState->testMenu;
-        }
-        (*g_appState->currentTest)->OnImGuiRender();
-        ImGui::End();
-    }
+    // Update and render application
+    g_appState->app->OnUpdate(0.0f);
+    g_appState->app->OnRender();
+    g_appState->app->OnImGuiRender();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -75,14 +63,20 @@ void main_loop() {
 int main() {
     if (!glfwInit()) return -1;
 
-
+#ifdef __EMSCRIPTEN__
+    // WebGL 2.0 = OpenGL ES 3.0
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#else
     // Desktop OpenGL 4.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
 
-    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Hello World", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Tic-Tac-Toe", nullptr, nullptr);
     if (!window) {
         glfwTerminate();
         return -1;
@@ -115,7 +109,7 @@ int main() {
 
     Renderer renderer;
 
-    // imgui
+    // ImGui setup
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.Fonts->AddFontDefault();
@@ -127,21 +121,14 @@ int main() {
     ImGui_ImplOpenGL3_Init("#version 330");
 #endif
 
-    Test::Test* currentTest = nullptr;
-    Test::TestMenu* testMenu = new Test::TestMenu(currentTest);
-    currentTest = testMenu;
-
-    testMenu->RegisterTest<Test::TestClearColor>("Clear Color");
-    testMenu->RegisterTest<Test::TestTexture>("Texture");
-    testMenu->RegisterTest<Test::Test3D>("3D Cube");
-    testMenu->RegisterTest<Test::TestChunk>("Voxel Chunk");
+    // Create application
+    Application app;
 
     // Setup global state for main loop
     AppState appState;
     appState.window = window;
     appState.renderer = &renderer;
-    appState.currentTest = &currentTest;  // Store pointer to the pointer
-    appState.testMenu = testMenu;
+    appState.app = &app;
     g_appState = &appState;
 
 #ifdef __EMSCRIPTEN__
@@ -155,13 +142,6 @@ int main() {
 #endif
 
     // Cleanup
-    if (currentTest == testMenu) {
-        delete testMenu;
-    }
-    else {
-        delete currentTest;
-        delete testMenu;
-    }
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

@@ -5,7 +5,7 @@
 #include "IndexBuffer.h"
 #include "Shader.h"
 
-#define ASSERT(x) if(!(x)) __debugbreak();
+//#define ASSERT(x) if(!(x)) __debugbreak();
 
 static class Renderer {
 private:

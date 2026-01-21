@@ -31,6 +31,7 @@ private:
 public:
 	VoxelClient();
 	void StartGameLoop();
+	void StopGameLoop();
 	void SetPlayerChoice(Player choice);
 	void SetOnStateChangeCallback(std::function<void()> callback) { onStateChangeCallback = callback; }
 

@@ -182,7 +182,7 @@ void ChunkRenderer::LoadChunks(const std::vector<Mesh>& meshes,
 
 	const float sceneSpan = glm::length(maxBounds - minBounds);
 	const float chunkExtent = glm::max(glm::max(chunkSize.x, chunkSize.y), chunkSize.z);
-	m_CameraDistance = glm::max(sceneSpan * 0.4f, chunkExtent * 2.0f);
+	m_CameraDistance = glm::max(sceneSpan * 0.6f, chunkExtent * 2.0f);
 
 	UpdateCameraFromOrbit();
 }

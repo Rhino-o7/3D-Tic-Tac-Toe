@@ -222,7 +222,7 @@ void Application::UpdateHoverState()
 	double mouseY = io.MousePos.y;
 	
 	// Create ray from camera through mouse position
-	Ray ray = ScreenToWorldRay(mouseX, mouseY, WINDOW_WIDTH, WINDOW_HEIGHT);
+	Ray ray = ScreenToWorldRay(mouseX, mouseY, m_WindowWidth, m_WindowHeight);
 	
 	// Raycast against all chunks
 	RayHit hit = RaycastChunks(ray);
@@ -269,7 +269,7 @@ void Application::HandleMouseInput()
 		double mouseY = io.MousePos.y;
 		
 		// Create ray from camera through mouse position
-		Ray ray = ScreenToWorldRay(mouseX, mouseY, WINDOW_WIDTH, WINDOW_HEIGHT);
+		Ray ray = ScreenToWorldRay(mouseX, mouseY, m_WindowWidth, m_WindowHeight);
 		
 		// Raycast against all chunks
 		RayHit hit = RaycastChunks(ray);
@@ -680,4 +680,17 @@ void Application::FillChunk(Chunk& chunk, VoxelType type)
 			}
 		}
 	}
+}
+
+void Application::OnResize(int width, int height)
+{
+    m_WindowWidth = width;
+    m_WindowHeight = height;
+
+    // Update renderer aspect ratio
+    float aspect = (height != 0) ? static_cast<float>(width) / static_cast<float>(height) : 1.0f;
+    m_Renderer.SetAspectRatio(aspect);
+
+    // Update the OpenGL viewport
+    glViewport(0, 0, width, height);
 }

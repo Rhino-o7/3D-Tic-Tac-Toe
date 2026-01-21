@@ -21,6 +21,7 @@ public:
 	void OnUpdate(float deltaTime);
 	void OnRender();
 	void OnImGuiRender();
+	void OnResize(int width, int height);
 
 private:
 	enum class GameState {
@@ -80,4 +81,6 @@ private:
 	// Window dimensions
 	static constexpr int WINDOW_WIDTH = 2000;
 	static constexpr int WINDOW_HEIGHT = 1000;
+	int m_WindowWidth = WINDOW_WIDTH;
+	int m_WindowHeight = WINDOW_HEIGHT;
 };

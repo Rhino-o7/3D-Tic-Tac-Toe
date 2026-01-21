@@ -40,6 +40,7 @@ struct AppState {
 };
 
 AppState* g_appState = nullptr;
+static Application* g_App = nullptr;
 
 void main_loop() {
     g_appState->renderer->Clear();
@@ -58,6 +59,14 @@ void main_loop() {
 
     glfwSwapBuffers(g_appState->window);
     glfwPollEvents();
+}
+
+void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+{
+    if (g_App)
+    {
+        g_App->OnResize(width, height);
+    }
 }
 
 int main() {
@@ -84,6 +93,7 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
+    glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
 #ifndef __EMSCRIPTEN__
     if (glewInit() != GLEW_OK) {
@@ -123,6 +133,7 @@ int main() {
 
     // Create application
     Application app;
+    g_App = &app;
 
     // Setup global state for main loop
     AppState appState;

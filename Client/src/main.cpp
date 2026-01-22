@@ -1,12 +1,5 @@
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/html5.h>
-#define GLFW_INCLUDE_ES3
-#include <GLFW/glfw3.h>
-#else
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#endif
 
 #include <iostream>
 
@@ -16,10 +9,9 @@
 #include "rendering/Renderer.h"
 #include "Application.h"
 
-const int WINDOW_WIDTH = 2000;
+const int WINDOW_WIDTH = 1000;
 const int WINDOW_HEIGHT = 1000;
 
-#ifndef __EMSCRIPTEN__
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei, const GLchar* message, const void*) {
     if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return; // ignore noise
     std::cout << "GL CALLBACK: "
@@ -30,12 +22,9 @@ void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum se
               << " msg=" << message << std::dec << std::endl;
     if (type == GL_DEBUG_TYPE_ERROR) std::abort();
 }
-#endif
 
-// Global state needed for Emscripten's main loop
 struct AppState {
     GLFWwindow* window;
-    Renderer* renderer;
     Application* app;
 };
 
@@ -43,13 +32,12 @@ AppState* g_appState = nullptr;
 static Application* g_App = nullptr;
 
 void main_loop() {
-    g_appState->renderer->Clear();
+	Renderer::Clear();
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     
-    // Update and render application
     g_appState->app->OnUpdate(0.0f);
     g_appState->app->OnRender();
     g_appState->app->OnImGuiRender();
@@ -61,7 +49,7 @@ void main_loop() {
     glfwPollEvents();
 }
 
-void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
+void FramebufferSizeCallback(GLFWwindow* /*window*/, int width, int height)
 {
     if (g_App)
     {
@@ -72,18 +60,11 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
 int main() {
     if (!glfwInit()) return -1;
 
-#ifdef __EMSCRIPTEN__
-    // WebGL 2.0 = OpenGL ES 3.0
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-#else
     // Desktop OpenGL 4.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-#endif
 
     GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "3D Tic-Tac-Toe", nullptr, nullptr);
     if (!window) {
@@ -95,13 +76,12 @@ int main() {
     glfwSwapInterval(1);
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-#ifndef __EMSCRIPTEN__
     if (glewInit() != GLEW_OK) {
         std::cout << "ERROR: GLEW NOT OK" << std::endl;
         return -1;
     }
 
-    // Enable debug output AFTER context and GLEW are ready
+    // Enable debug output
     GLint flags = 0;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
@@ -110,47 +90,33 @@ int main() {
         glDebugMessageCallback(MessageCallback, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     }
-#endif
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
 
-    Renderer renderer;
 
-    // ImGui setup
+    // ImGui 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.Fonts->AddFontDefault();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui::StyleColorsDark();
-#ifdef __EMSCRIPTEN__
-    ImGui_ImplOpenGL3_Init("#version 300 es");
-#else
     ImGui_ImplOpenGL3_Init("#version 330");
-#endif
 
-    // Create application
-    Application app;
+    // App
+    Application app(WINDOW_WIDTH, WINDOW_HEIGHT);
     g_App = &app;
 
-    // Setup global state for main loop
     AppState appState;
     appState.window = window;
-    appState.renderer = &renderer;
     appState.app = &app;
     g_appState = &appState;
 
-#ifdef __EMSCRIPTEN__
-    // Emscripten: Use callback-based main loop
-    emscripten_set_main_loop(main_loop, 0, 1);
-#else
-    // Windows: Use traditional while loop
     while (!glfwWindowShouldClose(window)) {
         main_loop();
     }
-#endif
 
     // Cleanup
     ImGui_ImplOpenGL3_Shutdown();

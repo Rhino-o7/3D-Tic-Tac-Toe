@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <thread>
 #include <atomic>
 #include <optional>
@@ -15,7 +14,7 @@
 
 class Application {
 public:
-	Application();
+	Application(int windowWidth, int windowHeight);
 	~Application();
 
 	void OnUpdate(float deltaTime);
@@ -40,7 +39,7 @@ private:
 	struct RayHit {
 		bool hit;
 		float distance;
-		glm::ivec3 chunkCoords; // Grid coordinates (x, y, z) in 0-2 range
+		glm::ivec3 chunkCoords; 
 		std::size_t chunkIndex;
 	};
 
@@ -79,8 +78,6 @@ private:
 	Player m_Winner;
 	
 	// Window dimensions
-	static constexpr int WINDOW_WIDTH = 2000;
-	static constexpr int WINDOW_HEIGHT = 1000;
-	int m_WindowWidth = WINDOW_WIDTH;
-	int m_WindowHeight = WINDOW_HEIGHT;
+	int m_WindowWidth;
+	int m_WindowHeight;
 };

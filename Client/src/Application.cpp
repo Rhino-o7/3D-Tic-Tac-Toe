@@ -2,15 +2,17 @@
 #include <imgui.h>
 #include <iostream>
 
-Application::Application()
-    : m_Renderer(2000.0f / 1000.0f),
-      m_SelectedChunkIndex(0),
-      m_NeedsUpdate(false),
-      m_HoveredChunkIndex(std::nullopt),
-      m_GameState(GameState::NotConnected),
-      m_ServerAddress("ws://localhost:9002"),
-      m_ConnectionStatus("Not connected"),
-      m_Winner(Player::NONE)
+Application::Application(int windowWidth, int windowHeight) :
+    m_Renderer((float)windowWidth / (float)windowHeight),
+    m_SelectedChunkIndex(0),
+    m_NeedsUpdate(false),
+    m_HoveredChunkIndex(std::nullopt),
+    m_GameState(GameState::NotConnected),
+    m_ServerAddress("ws://localhost:9002"),
+    m_ConnectionStatus("Not connected"),
+    m_Winner(Player::NONE),
+	m_WindowWidth(windowWidth),
+	m_WindowHeight(windowHeight)
 {
     m_Builder.BuildChunks();
     m_Builder.BuildChunksMesh();

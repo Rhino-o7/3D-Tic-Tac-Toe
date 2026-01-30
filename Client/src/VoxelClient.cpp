@@ -1,7 +1,9 @@
 #include "VoxelClient.h"
 #include <iostream>
 #include <limits>
-#include <thread>
+#ifndef __EMSCRIPTEN__
+    #include <thread>
+#endif
 #include "WebsocketClient.h"
 
 VoxelClient::VoxelClient() : player(Player::X), connected(false) {
@@ -179,56 +181,67 @@ void VoxelClient::handleGameState(const GameStateData& state)
 
 void VoxelClient::StartGameLoop()
 {
-	running = true;
-	while (running) {
-		if (!connected) {
-			std::cout << "Server disconnected. Exiting client.\n";
-			break;
-		}
+#ifndef __EMSCRIPTEN__
+    running = true;
+    while (running) {
+        if (!connected) {
+            std::cout << "Server disconnected. Exiting client.\n";
+            break;
+        }
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
-	// No longer running
-	if (connected) {
-		client->disconnect();
-	}
+    // No longer running
+    if (connected) {
+        client->disconnect();
+    }
+#else
+    // Web build: no background loop (stub)
+    running = false;
+#endif
 }
 
 void VoxelClient::StopGameLoop()
 {
-	running = false;
+    running = false;
 }
 
-bool VoxelClient::connectToServer(const std::string & uri)
+bool VoxelClient::connectToServer(const std::string& uri)
 {
-	try {
-		// Create new client socket ptr
-		client = std::make_unique<WebSocketClient>();
+    try {
+        // Create new client socket ptr
+        client = std::make_unique<WebSocketClient>();
 
-		client->setOnConnectCallback([this]() { onConnect(); });
-		client->setOnDisconnectCallback([this]() { onDisconnect(); });
-		client->setOnMessageCallback([this](const NetworkMessage& msg) { onMessage(msg); });
+        client->setOnConnectCallback([this]() { onConnect(); });
+        client->setOnDisconnectCallback([this]() { onDisconnect(); });
+        client->setOnMessageCallback([this](const NetworkMessage& msg) { onMessage(msg); });
 
-		client->connect(uri);
+        client->connect(uri);
 
-		// Wait for connection or timeout
-		int timeout = timeoutTime;
-		while (!connected && timeout > 0) {
-			std::cout << "Waiting for connection..." << std::endl;
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			timeout -= 500;
-		}
-		if (!connected) {
-			std::cerr << "Connection timed out." << std::endl;
-			return false;
-		}
+#ifdef __EMSCRIPTEN__
+        // Web build: Connection is async, return true to indicate connection initiated
+        std::cout << "Web build: Connection initiated asynchronously..." << std::endl;
+        return true;
+#else
+        // Native build: Wait for connection or timeout
+        int timeout = timeoutTime;
+        while (!connected && timeout > 0) {
+            std::cout << "Waiting for connection..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            timeout -= 500;
+        }
+        if (!connected) {
+            std::cerr << "Connection timed out." << std::endl;
+            return false;
+        }
 
-		std::cout << "Connected. Ready to set player choice from UI..." << std::endl;
-		return true;
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Error setting up connection: " << e.what() << std::endl;
-		return false;
-	}
+        std::cout << "Connected. Ready to set player choice from UI..." << std::endl;
+        return true;
+#endif
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error setting up connection: " << e.what() << std::endl;
+        return false;
+    }
 }

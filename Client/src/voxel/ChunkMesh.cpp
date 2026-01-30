@@ -2,8 +2,8 @@
 #include "Voxel.h"
 
 #include <array>
-#include <cstddef>
 
+// Face UV coordinates and indices for a quad
 namespace
 {
 	constexpr std::array<float, 8> kFaceUVs{

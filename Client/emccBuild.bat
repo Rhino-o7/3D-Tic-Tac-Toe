@@ -18,7 +18,10 @@ REM =========================
 REM Build with Emscripten
 REM =========================
 emcc ^
-%SRC_DIR%\rendering\TestGL.cpp ^
+%SRC_DIR%\main.cpp ^
+%SRC_DIR%\Application.cpp ^
+%SRC_DIR%\VoxelClient.cpp ^
+%SRC_DIR%\WebsocketClient.cpp ^
 %SRC_DIR%\rendering\Renderer.cpp ^
 %SRC_DIR%\rendering\Shader.cpp ^
 %SRC_DIR%\rendering\Texture.cpp ^
@@ -37,7 +40,6 @@ emcc ^
 %SRC_DIR%\voxel\ChunkMesh.cpp ^
 %SRC_DIR%\voxel\TextureAtlas.cpp ^
 %SRC_DIR%\vendor\stb\stb_image.cpp ^
-%SRC_DIR%\VoxelClient.cpp ^
 %CORE_DIR%\src\board.cpp ^
 %CORE_DIR%\src\game.cpp ^
 %CORE_DIR%\src\network_message.cpp ^
@@ -54,12 +56,14 @@ emcc ^
 -s FULL_ES3=1 ^
 -s ALLOW_MEMORY_GROWTH=1 ^
 -s WASM=1 ^
+-s ASSERTIONS=1 ^
+-lwebsocket.js ^
 -Isrc ^
--I%CORE_DIR%\include ^
+-I%CORE_DIR%\\include ^
 -I%IMGUI_DIR% ^
--Isrc\vendor\stb ^
--Isrc\vendor\glm ^
--std=c++17
+-Isrc\\vendor\\stb ^
+-Isrc\\vendor\\glm ^
+-std=c++17 --preload-file res@/res ^
 
 if errorlevel 1 (
     echo.

@@ -4,9 +4,9 @@
 #include <tuple>
 #include <limits>
 #include <iostream>
-#include <random> // ADD THIS
+#include <random> 
 
-constexpr int MAX_DEPTH = 2;
+constexpr int MAX_DEPTH = 3;
 constexpr int WIN_SCORE = 100;
 
 // use to iteratre over board instead of nested loops
@@ -93,15 +93,9 @@ std::tuple<int, int, int> AI::getBestMove() {
         }
     }
 
-    std::vector<int> indices(27);
-    for (int i = 0; i < 27; ++i) indices[i] = i;
+    std::vector<std::tuple<int,int,int>> bestMoves;
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(indices.begin(), indices.end(), g);
-
-    // Minimax
-    for (int idx : indices) {
+    for (int idx = 0; idx < 27; ++idx) {  // No shuffle
         int x, y, z; toXYZ(idx, x, y, z);
         if (tmpBoard.getCell(x, y, z) == Player::NONE) {
             Board candidateBoard(tmpBoard);
@@ -110,15 +104,24 @@ std::tuple<int, int, int> AI::getBestMove() {
             int score = minimax(candidateBoard, 1, false,
                 std::numeric_limits<int>::min(),
                 std::numeric_limits<int>::max(),
-                MAX_DEPTH);
+                skillLevel);
 
             if (score > bestScore) {
                 bestScore = score;
-                bestX = x;
-                bestY = y;
-                bestZ = z;
+                bestMoves.clear();
+                bestMoves.push_back(std::make_tuple(x, y, z));
+            } else if (score == bestScore) {
+                bestMoves.push_back(std::make_tuple(x, y, z));
             }
         }
+    }
+
+    // Randomly pick from best moves
+    if (!bestMoves.empty()) {
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::uniform_int_distribution<> dis(0, bestMoves.size() - 1);
+        return bestMoves[dis(g)];
     }
 
     return std::make_tuple(bestX, bestY, bestZ);

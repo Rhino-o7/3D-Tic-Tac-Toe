@@ -35,7 +35,7 @@ void GameSession::handlePlayerChoice(Player choice) { // Sets the X and O of Pla
 	aiPlayer = (choice == Player::X) ? Player::O : Player::X;
 
 	game = std::make_unique<Game>(clientPlayer);
-	ai = std::make_unique<AI>(aiPlayer, &game->getBoard(), 5);
+	ai = std::make_unique<AI>(aiPlayer, &game->getBoard(), 10); // Set Skill to 5, make var later
 
 	// Check who goes first
 	if (game->getCurrentTurn() == aiPlayer) {

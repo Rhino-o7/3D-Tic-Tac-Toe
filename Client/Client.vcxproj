@@ -160,7 +160,6 @@
     <ClCompile Include="src\voxel\ChunkMesh.cpp" />
     <ClCompile Include="src\voxel\Chunk.cpp" />
     <ClCompile Include="src\rendering\Shader.cpp" />
-    <ClCompile Include="src\ConsoleClient.cpp" />
     <ClCompile Include="src\rendering\IndexBuffer.cpp" />
     <ClCompile Include="src\rendering\Renderer.cpp" />
     <ClCompile Include="src\rendering\Texture.cpp" />
@@ -176,7 +175,6 @@
     <ClCompile Include="src\vendor\stb\stb_image.cpp" />
     <ClCompile Include="src\voxel\TextureAtlas.cpp" />
     <ClCompile Include="src\WebsocketClient.cpp" />
-    <ClCompile Include="src\voxel\Voxel.cpp" />
     <ClCompile Include="src\VoxelClient.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -187,7 +185,6 @@
     <ClInclude Include="src\voxel\ChunkMesh.h" />
     <ClInclude Include="src\voxel\Chunk.h" />
     <ClInclude Include="src\rendering\Shader.h" />
-    <ClInclude Include="src\ConsoleClient.h" />
     <ClInclude Include="src\rendering\IndexBuffer.h" />
     <ClInclude Include="src\rendering\Renderer.h" />
     <ClInclude Include="src\rendering\VertexArray.h" />

@@ -16,7 +16,7 @@ private:
 	bool connected;
 	bool waitingForPlayerChoice = false;
 	std::vector<glm::vec3> updatedChunks;
-	mutable std::mutex stateMutex; // <-- Add 'mutable' here
+	mutable std::mutex stateMutex; 
 	GameStateData lastState{};
 	bool hasState{ false };
 	bool waitingForTurn{ false };

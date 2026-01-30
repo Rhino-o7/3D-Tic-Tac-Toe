@@ -26,6 +26,7 @@ public:
 	bool RebuildChunkMesh(std::size_t index);
 
 private:
+	// Chunk dimensions
 	static constexpr int CHUNK_SIZE_X = 32;
 	static constexpr int CHUNK_SIZE_Y = 32;
 	static constexpr int CHUNK_SIZE_Z = 32;

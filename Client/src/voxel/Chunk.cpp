@@ -110,6 +110,7 @@ void Chunk::SetChunkGame(int borderWidth, int chunkX, int chunkY, int chunkZ)
 	
 }
 
+// Sets tictactoe board lines
 void Chunk::SetChunkBorder(int borderWidth)
 {
 	const int thickness = borderWidth < 0 ? 0 : borderWidth;
@@ -165,8 +166,8 @@ void Chunk::SetChunkPlayer(Player player)
 		SetChunkAll(VoxelType::Air);
 		SetChunkBorder(m_BorderWidth);
 		break;
-	case Player::X:
-		{
+	case Player::X: // Create X diagonals
+		{ 
 			const int minDimension = std::min({ m_SizeX, m_SizeY, m_SizeZ });
 			const int thickness = std::max(1, minDimension / 16);
 			const double normDenom = static_cast<double>(std::max(1, minDimension - 1));
@@ -227,7 +228,7 @@ void Chunk::SetChunkPlayer(Player player)
 			}
 		}
 		break;
-	case Player::O:
+	case Player::O: // Create sphere
 		
 	{
 		int radius = m_SizeX / 4;

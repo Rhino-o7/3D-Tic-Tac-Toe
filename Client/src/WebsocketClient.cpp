@@ -1,6 +1,8 @@
 #include "WebsocketClient.h"
 #include <iostream>
 
+#ifndef __EMSCRIPTEN__
+
 // placeholders 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
@@ -167,4 +169,155 @@ void WebSocketClient::setOnConnectCallback(std::function<void()> callback) {
 void WebSocketClient::setOnDisconnectCallback(std::function<void()> callback) {
 	onDisconnectCallback = callback;
 }
+
+#else // __EMSCRIPTEN__
+
+#include <emscripten/emscripten.h>
+#include <emscripten/websocket.h>
+
+WebSocketClient::WebSocketClient() : socketId(-1), connected(false) {
+	std::cout << "WebSocketClient (Emscripten): Initializing..." << std::endl;
+}
+
+WebSocketClient::~WebSocketClient() {
+	std::cout << "WebSocketClient (Emscripten): Destructor called" << std::endl;
+	disconnect();
+}
+
+void WebSocketClient::connect(const std::string& uri) {
+	if (socketId >= 0) {
+		std::cerr << "WebSocketClient: Already connected or connecting" << std::endl;
+		return;
+	}
+
+	std::cout << "WebSocketClient (Emscripten): Connecting to " << uri << std::endl;
+
+	// Check if WebSocket is supported
+	if (!emscripten_websocket_is_supported()) {
+		std::cerr << "WebSocketClient: WebSockets are not supported by this browser" << std::endl;
+		return;
+	}
+
+	// Create WebSocket attributes
+	EmscriptenWebSocketCreateAttributes attrs;
+	emscripten_websocket_init_create_attributes(&attrs);
+	attrs.url = uri.c_str();
+	attrs.createOnMainThread = false;
+
+	// Create WebSocket
+	socketId = emscripten_websocket_new(&attrs);
+	if (socketId < 0) {
+		std::cerr << "WebSocketClient: Failed to create WebSocket (error: " << socketId << ")" << std::endl;
+		return;
+	}
+
+	// Set event handlers
+	emscripten_websocket_set_onopen_callback(socketId, this, emscripten_onopen_callback);
+	emscripten_websocket_set_onerror_callback(socketId, this, emscripten_onerror_callback);
+	emscripten_websocket_set_onclose_callback(socketId, this, emscripten_onclose_callback);
+	emscripten_websocket_set_onmessage_callback(socketId, this, emscripten_onmessage_callback);
+
+	std::cout << "WebSocketClient (Emscripten): Connection initiated (socket id: " << socketId << ")" << std::endl;
+}
+
+void WebSocketClient::disconnect() {
+	if (socketId >= 0) {
+		std::cout << "WebSocketClient (Emscripten): Disconnecting..." << std::endl;
+		emscripten_websocket_close(socketId, 1000, "Client disconnecting");
+		emscripten_websocket_delete(socketId);
+		socketId = -1;
+		connected = false;
+	}
+}
+
+void WebSocketClient::sendMessage(const NetworkMessage& msg) {
+	if (!connected || socketId < 0) {
+		std::cerr << "Cannot send message: not connected" << std::endl;
+		return;
+	}
+
+	try {
+		std::string serialized = msg.serialize();
+		std::cout << "Sending message (Emscripten): " << serialized << std::endl;
+		
+		EMSCRIPTEN_RESULT result = emscripten_websocket_send_utf8_text(socketId, serialized.c_str());
+		if (result != EMSCRIPTEN_RESULT_SUCCESS) {
+			std::cerr << "Failed to send message (error: " << result << ")" << std::endl;
+		}
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Send error: " << e.what() << std::endl;
+	}
+}
+
+void WebSocketClient::setOnMessageCallback(std::function<void(const NetworkMessage&)> callback) {
+	onMessageCallback = callback;
+}
+
+void WebSocketClient::setOnConnectCallback(std::function<void()> callback) {
+	onConnectCallback = callback;
+}
+
+void WebSocketClient::setOnDisconnectCallback(std::function<void()> callback) {
+	onDisconnectCallback = callback;
+}
+
+// Static callback implementations
+EM_BOOL WebSocketClient::emscripten_onopen_callback(int eventType, const EmscriptenWebSocketOpenEvent* event, void* userData) {
+	WebSocketClient* client = static_cast<WebSocketClient*>(userData);
+	client->connected = true;
+	std::cout << "WebSocketClient (Emscripten): Connected to server!" << std::endl;
+
+	if (client->onConnectCallback) {
+		client->onConnectCallback();
+	}
+
+	return EM_TRUE;
+}
+
+EM_BOOL WebSocketClient::emscripten_onerror_callback(int eventType, const EmscriptenWebSocketErrorEvent* event, void* userData) {
+	std::cerr << "WebSocketClient (Emscripten): WebSocket error occurred" << std::endl;
+	return EM_TRUE;
+}
+
+EM_BOOL WebSocketClient::emscripten_onclose_callback(int eventType, const EmscriptenWebSocketCloseEvent* event, void* userData) {
+	WebSocketClient* client = static_cast<WebSocketClient*>(userData);
+	client->connected = false;
+	
+	std::cout << "WebSocketClient (Emscripten): Disconnected from server (code: " 
+	          << event->code << ", reason: " << event->reason << ")" << std::endl;
+
+	if (client->onDisconnectCallback) {
+		client->onDisconnectCallback();
+	}
+
+	return EM_TRUE;
+}
+
+EM_BOOL WebSocketClient::emscripten_onmessage_callback(int eventType, const EmscriptenWebSocketMessageEvent* event, void* userData) {
+	WebSocketClient* client = static_cast<WebSocketClient*>(userData);
+	
+	try {
+		if (event->isText) {
+			std::string message(reinterpret_cast<const char*>(event->data), event->numBytes);
+			std::cout << "WebSocketClient (Emscripten): Received raw message: " << message << std::endl;
+
+			NetworkMessage networkMsg = NetworkMessage::deserialize(message);
+
+			if (client->onMessageCallback) {
+				client->onMessageCallback(networkMsg);
+			}
+		}
+		else {
+			std::cerr << "Received binary message, but expected text" << std::endl;
+		}
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Message parse error: " << e.what() << std::endl;
+	}
+
+	return EM_TRUE;
+}
+
+#endif // __EMSCRIPTEN__
 

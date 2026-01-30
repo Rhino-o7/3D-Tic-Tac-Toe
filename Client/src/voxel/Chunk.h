@@ -4,7 +4,6 @@
 #include "board.h"
 
 
-
 class Chunk
 {
 private:
@@ -15,7 +14,6 @@ private:
 	int m_BorderWidth;
 public:
 	Chunk(int sizeX, int sizeY, int sizeZ);
-	~Chunk() {}
 
 	std::vector<VoxelType>& GetVoxels() { return m_Voxels; }
 	const std::vector<VoxelType>& GetVoxels() const { return m_Voxels; }
@@ -24,16 +22,17 @@ public:
 	int GetSizeY() const { return m_SizeY; }
 	int GetSizeZ() const { return m_SizeZ; }
 
-	void SetChunkAll(VoxelType type);
-	void SetChunkHover();
 	void ClearChunkHover();
-	void SetChunkSolid();
-	void SetChunkSomeSolid();
 	void ClearButBorder();
 
+	// Setting Chunks
 	void SetChunkGame(int borderWidth, int chunkX, int chunkY, int chunkZ);
 	void SetChunkBorder(int borderWidth);
 	void SetChunkPlayer(Player player);
+	void SetChunkSomeSolid();
+	void SetChunkAll(VoxelType type);
+	void SetChunkSolid();
+	void SetChunkHover();
 
 	VoxelType GetIndex(int x, int y, int z) const;
 	VoxelNeighbors GetNeighbors(int x, int y, int z) const;

@@ -25,7 +25,7 @@ public:
 	void ClearChunkHover();
 	void ClearButBorder();
 
-	// Setting Chunks
+	// Setting Chunks to varios patterns
 	void SetChunkGame(int borderWidth, int chunkX, int chunkY, int chunkZ);
 	void SetChunkBorder(int borderWidth);
 	void SetChunkPlayer(Player player);

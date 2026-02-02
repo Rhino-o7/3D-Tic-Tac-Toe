@@ -52,9 +52,10 @@ void ChunkRenderer::Validate()
 		m_Shader->SetUniform4f("u_Color", 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
+	// Get textuers from texture atlas
 	if (!m_TextureAtlas.IsInitialized())
 	{
-		m_TextureAtlas.Initialize("res/textures/voxel_atlas.png", 2, 2);
+		m_TextureAtlas.Initialize("res/textures/voxel_atlas.png", 2, 2); 
 		m_TextureAtlas.MapVoxelTexture(VoxelType::Solid, 0, 0);
 		m_TextureAtlas.MapVoxelTexture(VoxelType::X, 1, 0);
 		m_TextureAtlas.MapVoxelTexture(VoxelType::O, 0, 1);

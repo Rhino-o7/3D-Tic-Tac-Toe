@@ -4,7 +4,7 @@ setlocal
 REM =========================
 REM Paths
 REM =========================
-set BUILD_DIR=build\web
+set BUILD_DIR=..\Builds\Client-Web
 set IMGUI_DIR=src\vendor\imgui
 set SRC_DIR=src
 set CORE_DIR=..\Core

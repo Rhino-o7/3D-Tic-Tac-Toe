@@ -55,7 +55,7 @@ unsigned int Shader::CompileShader(const std::string& source, unsigned int type)
     }
     return id;
 }
-
+// Convert the 1 shader file into the vertex and fragment shaders
  ShaderProgramSource Shader::ParseShader(const std::string& file) {
 
     enum class ShaderType {

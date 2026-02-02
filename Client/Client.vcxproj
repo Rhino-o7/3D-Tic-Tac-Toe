@@ -75,7 +75,7 @@
     <IntDir>$(Platform)\$(Configuration)\Client</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\Client</OutDir>
+    <OutDir>$(SolutionDir)\Builds\Client</OutDir>
     <IntDir>$(Platform)\$(Configuration)\Client</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

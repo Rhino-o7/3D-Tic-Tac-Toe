@@ -18,26 +18,26 @@
         WebSocketClient();
         ~WebSocketClient();
 
-        void connect(const std::string& uri);
-        void disconnect();
-        void sendMessage(const NetworkMessage& msg);
+        void Connect(const std::string& uri);
+        void Disconnect();
+        void SendNetworkMessage(const NetworkMessage& msg);
 
-        bool isConnected() const { return connected; }
+        bool isConnected() const { return m_Connected; }
 
-        void setOnMessageCallback(std::function<void(const NetworkMessage&)> callback);
-        void setOnConnectCallback(std::function<void()> callback);
-        void setOnDisconnectCallback(std::function<void()> callback);
+        void SetOnMessageCallback(std::function<void(const NetworkMessage&)> callback);
+        void SetOnConnectCallback(std::function<void()> callback);
+        void SetOnDisconnectCallback(std::function<void()> callback);
 
     private:
-        void onOpen(ConnectionHandle hdl);
-        void onClose(ConnectionHandle hdl);
-        void onMessage(ConnectionHandle hdl, WebSocketClientType::message_ptr msg);
-        void onFail(ConnectionHandle hdl);
+        void OnOpen(ConnectionHandle hdl);
+        void OnClose(ConnectionHandle hdl);
+        void OnMessage(ConnectionHandle hdl, WebSocketClientType::message_ptr msg);
+        void OnFail(ConnectionHandle hdl);
 
-        WebSocketClientType client;
-        ConnectionHandle connectionHandle;
-        std::thread asioThread;
-        bool connected = false;
+        WebSocketClientType m_Client;
+        ConnectionHandle m_ConnectionHandle;
+        std::thread m_AsioThread;
+        bool m_Connected = false;
 
         std::function<void(const NetworkMessage&)> onMessageCallback;
         std::function<void()> onConnectCallback;
@@ -54,15 +54,15 @@
         WebSocketClient();
         ~WebSocketClient();
 
-        void connect(const std::string& uri);
-        void disconnect();
-        void sendMessage(const NetworkMessage& msg);
+        void Connect(const std::string& uri);
+        void Disconnect();
+        void SendNetworkMessage(const NetworkMessage& msg);
 
         bool isConnected() const { return connected; }
 
-        void setOnMessageCallback(std::function<void(const NetworkMessage&)> callback);
-        void setOnConnectCallback(std::function<void()> callback);
-        void setOnDisconnectCallback(std::function<void()> callback);
+        void SetOnMessageCallback(std::function<void(const NetworkMessage&)> callback);
+        void SetOnConnectCallback(std::function<void()> callback);
+        void SetOnDisconnectCallback(std::function<void()> callback);
 
     private:
         int socketId = -1;
@@ -72,7 +72,7 @@
         std::function<void()> onConnectCallback;
         std::function<void()> onDisconnectCallback;
 
-        // Static callbacks for Emscripten C API - must match Emscripten's expected signatures
+        // Static callbacks for Emscripten C API must match Emscripten's expected signatures
         static EM_BOOL emscripten_onopen_callback(int eventType, const EmscriptenWebSocketOpenEvent* event, void* userData);
         static EM_BOOL emscripten_onerror_callback(int eventType, const EmscriptenWebSocketErrorEvent* event, void* userData);
         static EM_BOOL emscripten_onclose_callback(int eventType, const EmscriptenWebSocketCloseEvent* event, void* userData);

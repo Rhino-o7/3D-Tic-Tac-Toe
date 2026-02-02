@@ -71,7 +71,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\r2osb\AppData\Local\Temp\tmpjs1llnk9.js
+// include: C:\Users\r2osb\AppData\Local\Temp\tmpqgpa9div.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -90,7 +90,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
         // web worker
         PACKAGE_PATH = encodeURIComponent(location.pathname.substring(0, location.pathname.lastIndexOf('/')) + '/');
       }
-      var PACKAGE_NAME = 'build/web/index.data';
+      var PACKAGE_NAME = '../Builds/Client-Web/index.data';
       var REMOTE_PACKAGE_BASE = 'index.data';
       var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
       var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
@@ -181,9 +181,9 @@ Module['FS_createPath']("/res", "textures", true, true);
         Module['FS_createDataFile'](name, null, data, true, true, true);
         Module['removeRunDependency'](`fp ${name}`);
           }
-          Module['removeRunDependency']('datafile_build/web/index.data');
+          Module['removeRunDependency']('datafile_../Builds/Client-Web/index.data');
       }
-      Module['addRunDependency']('datafile_build/web/index.data');
+      Module['addRunDependency']('datafile_../Builds/Client-Web/index.data');
 
       if (!Module['preloadResults']) Module['preloadResults'] = {};
 
@@ -206,21 +206,21 @@ Module['FS_createPath']("/res", "textures", true, true);
 
   })();
 
-// end include: C:\Users\r2osb\AppData\Local\Temp\tmpjs1llnk9.js
-// include: C:\Users\r2osb\AppData\Local\Temp\tmpoa29ue57.js
+// end include: C:\Users\r2osb\AppData\Local\Temp\tmpqgpa9div.js
+// include: C:\Users\r2osb\AppData\Local\Temp\tmprtshrsyn.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\r2osb\AppData\Local\Temp\tmpoa29ue57.js
-// include: C:\Users\r2osb\AppData\Local\Temp\tmpw0tbradv.js
+  // end include: C:\Users\r2osb\AppData\Local\Temp\tmprtshrsyn.js
+// include: C:\Users\r2osb\AppData\Local\Temp\tmp81s80tzo.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\r2osb\AppData\Local\Temp\tmpw0tbradv.js
+  // end include: C:\Users\r2osb\AppData\Local\Temp\tmp81s80tzo.js
 
 
 var arguments_ = [];

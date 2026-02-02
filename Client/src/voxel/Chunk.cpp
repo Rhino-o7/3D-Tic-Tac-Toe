@@ -57,7 +57,7 @@ void Chunk::ClearChunkHover()
 		{
 			for (int z = 0; z < m_SizeY; ++z)
 			{
-				if (GetIndex(x, y, z) == VoxelType::Hover) {  // Changed from VoxelType::Air
+				if (GetIndex(x, y, z) == VoxelType::Hover) {  
 					SetIndex(x, y, z, VoxelType::Air);
 				}
 			}

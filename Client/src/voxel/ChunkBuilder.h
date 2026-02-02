@@ -8,7 +8,7 @@
 class ChunkBuilder
 {
 public:
-	ChunkBuilder();
+	ChunkBuilder() {};
 
 	void BuildChunks();
 	void BuildChunksMesh();

@@ -17,27 +17,28 @@ public:
 	WebSocketServer();
 	~WebSocketServer();
 
-	void init(uint16_t port);
-	void run();
-	void stop();
-	void sendMessage(ConnectionHandle hdl, const NetworkMessage& msg);
+	void Init(uint16_t port);
+	void Run();
+	void Stop();
+	void SendNetworkMessage(ConnectionHandle hdl, const NetworkMessage& msg);
 
 	// Callbacks
-	void setOnMessageCallback(std::function<void(ConnectionHandle, const NetworkMessage&)> callback);
-	void setOnConnectCallback(std::function<void(ConnectionHandle)> callback);
-	void setOnDisconnectCallback(std::function<void(ConnectionHandle)> callback);
+	void SetOnMessageCallback(std::function<void(ConnectionHandle, const NetworkMessage&)> callback);
+	void SetOnConnectCallback(std::function<void(ConnectionHandle)> callback);
+	void SetOnDisconnectCallback(std::function<void(ConnectionHandle)> callback);
 
 private:
-	void onOpen(ConnectionHandle hdl);
-	void onClose(ConnectionHandle hdl);
-	void onMessage(ConnectionHandle hdl, WebSocketServerType::message_ptr msg);
+	void OnOpen(ConnectionHandle hdl);
+	void OnClose(ConnectionHandle hdl);
+	void OnMessage(ConnectionHandle hdl, WebSocketServerType::message_ptr msg);
 
-	WebSocketServerType server;
-	std::set<ConnectionHandle, std::owner_less<ConnectionHandle>> connections;
+	WebSocketServerType m_Server;
+	uint16_t m_Port;
+	std::set<ConnectionHandle, std::owner_less<ConnectionHandle>> m_Connections;
 
-	std::function<void(ConnectionHandle, const NetworkMessage&)> onMessageCallback;
-	std::function<void(ConnectionHandle)> onConnectCallback;
-	std::function<void(ConnectionHandle)> onDisconnectCallback;
+	std::function<void(ConnectionHandle, const NetworkMessage&)> OnMessageCallback;
+	std::function<void(ConnectionHandle)> OnConnectCallback;
+	std::function<void(ConnectionHandle)> OnDisconnectCallback;
 
-	uint16_t port;
+	
 };

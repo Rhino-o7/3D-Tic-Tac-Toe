@@ -23,7 +23,7 @@ const int WINDOW_HEIGHT = 1000;
 void GLAPIENTRY MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei,
                                 const GLchar* message, const void*)
 {
-    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return; // ignore small warnings
+    if (severity == GL_DEBUG_SEVERITY_NOTIFICATION) return; // ignore 
     std::cout << "GL CALLBACK: "
               << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR ** " : "")
               << "type=" << std::hex << type
@@ -77,12 +77,12 @@ int main()
         return -1;
 
 #ifdef __EMSCRIPTEN__
-    // WebGL2 / ES3
+    // ES3
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #else
-    // Desktop 
+    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);

@@ -16,6 +16,7 @@ namespace
 	constexpr std::array<unsigned int, 6> kFaceIndices{ 0, 1, 2, 2, 3, 0 };
 }
 
+// Create a single mesh from the chunk's voxels instead of rendering eaach voxel individually
 Mesh ChunkMesh::GenerateMesh(const Chunk& chunk)
 {
 	Mesh chunkMesh;
@@ -40,6 +41,7 @@ Mesh ChunkMesh::GenerateMesh(const Chunk& chunk)
 
 	const VoxelFace faceTemplates;
 
+	// append a face to the mesh
 	const auto appendFace = [&](const float* faceVertices, int x, int y, int z, VoxelType type)
 	{
 		const unsigned int baseVertex = static_cast<unsigned int>(chunkMesh.vertices.size() / 3);
@@ -71,6 +73,7 @@ Mesh ChunkMesh::GenerateMesh(const Chunk& chunk)
 			continue;
 		}
 
+		// Set voxel faces based on neighbors
 		const VoxelType currentType = voxels[i];
 		const int x = i % sizeX;
 		const int y = (i / sizeX) % sizeY;

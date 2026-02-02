@@ -3,25 +3,25 @@
 
 #ifndef __EMSCRIPTEN__
 
-// placeholders 
+// placeholders
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
 
-WebSocketClient::WebSocketClient() : connected(false) {
+WebSocketClient::WebSocketClient() : m_Connected(false) {
 	std::cout << "WebSocketClient: Initializing..." << std::endl;
 
 	try {
-		client.init_asio();
+		m_Client.init_asio();
 
-		client.clear_access_channels(websocketpp::log::alevel::all);
-		client.clear_error_channels(websocketpp::log::elevel::all);
-		client.set_access_channels(websocketpp::log::alevel::connect | websocketpp::log::alevel::disconnect);
+		m_Client.clear_access_channels(websocketpp::log::alevel::all);
+		m_Client.clear_error_channels(websocketpp::log::elevel::all);
+		m_Client.set_access_channels(websocketpp::log::alevel::connect | websocketpp::log::alevel::disconnect);
 
-		client.set_open_handler(bind(&WebSocketClient::onOpen, this, _1));
-		client.set_close_handler(bind(&WebSocketClient::onClose, this, _1));
-		client.set_message_handler(bind(&WebSocketClient::onMessage, this, _1, _2));
-		client.set_fail_handler(bind(&WebSocketClient::onFail, this, _1));
+		m_Client.set_open_handler(bind(&WebSocketClient::OnOpen, this, _1));
+		m_Client.set_close_handler(bind(&WebSocketClient::OnClose, this, _1));
+		m_Client.set_message_handler(bind(&WebSocketClient::OnMessage, this, _1, _2));
+		m_Client.set_fail_handler(bind(&WebSocketClient::OnFail, this, _1));
 
 		std::cout << "WebSocketClient: Initialized successfully" << std::endl;
 	}
@@ -33,29 +33,29 @@ WebSocketClient::WebSocketClient() : connected(false) {
 
 WebSocketClient::~WebSocketClient() {
 	std::cout << "WebSocketClient: Destructor called" << std::endl;
-	disconnect();
+	Disconnect();
 }
 
-void WebSocketClient::connect(const std::string& uri) {
+void WebSocketClient::Connect(const std::string& uri) {
 	try {
 		std::cout << "WebSocketClient: Attempting to connect to " << uri << std::endl;
 		//check for error
 		websocketpp::lib::error_code ec;
-		WebSocketClientType::connection_ptr con = client.get_connection(uri, ec);
+		WebSocketClientType::connection_ptr con = m_Client.get_connection(uri, ec);
 
 		if (ec) {
 			std::cerr << "Connection error: " << ec.message() << std::endl;
 			return;
 		}
 
-		connectionHandle = con->get_handle();
-		client.connect(con);
+		m_ConnectionHandle = con->get_handle();
+		m_Client.connect(con);
 
 		// Start ASIO in thread
-		asioThread = std::thread([this]() {
+		m_AsioThread = std::thread([this]() {
 			std::cout << "ASIO thread started" << std::endl;
 			try {
-				client.run();
+				m_Client.run();
 				std::cout << "ASIO thread ended" << std::endl;
 			}
 			catch (const std::exception& e) {
@@ -70,31 +70,31 @@ void WebSocketClient::connect(const std::string& uri) {
 	}
 }
 
-void WebSocketClient::disconnect() {
-	if (connected) {
+void WebSocketClient::Disconnect() {
+	if (m_Connected) {
 		std::cout << "WebSocketClient: Disconnecting..." << std::endl;
 
 		websocketpp::lib::error_code ec;
-		client.close(connectionHandle, websocketpp::close::status::normal, "Client disconnecting", ec);
+		m_Client.close(m_ConnectionHandle, websocketpp::close::status::normal, "Client disconnecting", ec);
 
 		//error
 		if (ec) {
 			std::cerr << "Disconnect error: " << ec.message() << std::endl;
 		}
 
-		connected = false;
+		m_Connected = false;
 	}
 
-	client.stop();
+	m_Client.stop();
 
 	// end thread
-	if (asioThread.joinable()) {
-		asioThread.join();
+	if (m_AsioThread.joinable()) {
+		m_AsioThread.join();
 	}
 }
 
-void WebSocketClient::sendMessage(const NetworkMessage& msg) {
-	if (!connected) {
+void WebSocketClient::SendNetworkMessage(const NetworkMessage& msg) {
+	if (!m_Connected) {
 		std::cerr << "Cannot send message: not connected" << std::endl;
 		return;
 	}
@@ -102,7 +102,7 @@ void WebSocketClient::sendMessage(const NetworkMessage& msg) {
 	try {
 		std::string serialized = msg.serialize();
 		std::cout << "Sending message: " << serialized << std::endl;
-		client.send(connectionHandle, serialized, websocketpp::frame::opcode::text);
+		m_Client.send(m_ConnectionHandle, serialized, websocketpp::frame::opcode::text);
 	}
 	catch (const std::exception& e) {
 		std::cerr << "Send error: " << e.what() << std::endl;
@@ -111,8 +111,8 @@ void WebSocketClient::sendMessage(const NetworkMessage& msg) {
 
 
 
-void WebSocketClient::onOpen(ConnectionHandle hdl) {
-	connected = true;
+void WebSocketClient::OnOpen(ConnectionHandle hdl) {
+	m_Connected = true;
 	std::cout << "WebSocketClient: Connected to server!" << std::endl;
 
 	if (onConnectCallback) {
@@ -120,8 +120,8 @@ void WebSocketClient::onOpen(ConnectionHandle hdl) {
 	}
 }
 
-void WebSocketClient::onClose(ConnectionHandle hdl) {
-	connected = false;
+void WebSocketClient::OnClose(ConnectionHandle hdl) {
+	m_Connected = false;
 	std::cout << "WebSocketClient: Disconnected from server" << std::endl;
 
 	if (onDisconnectCallback) {
@@ -129,7 +129,7 @@ void WebSocketClient::onClose(ConnectionHandle hdl) {
 	}
 }
 
-void WebSocketClient::onMessage(ConnectionHandle hdl, WebSocketClientType::message_ptr msg) {
+void WebSocketClient::OnMessage(ConnectionHandle hdl, WebSocketClientType::message_ptr msg) {
 	try {
 		std::cout << "WebSocketClient: Received raw message: " << msg->get_payload() << std::endl;
 
@@ -144,13 +144,13 @@ void WebSocketClient::onMessage(ConnectionHandle hdl, WebSocketClientType::messa
 	}
 }
 
-void WebSocketClient::onFail(ConnectionHandle hdl) {
+void WebSocketClient::OnFail(ConnectionHandle hdl) {
 	std::cerr << "WebSocketClient: Connection failed" << std::endl;
 
-	WebSocketClientType::connection_ptr con = client.get_con_from_hdl(hdl);
+	WebSocketClientType::connection_ptr con = m_Client.get_con_from_hdl(hdl);
 	std::cerr << "Fail reason: " << con->get_ec().message() << std::endl;
 
-	connected = false;
+	m_Connected = false;
 
 	
 	if (onDisconnectCallback) {
@@ -158,15 +158,15 @@ void WebSocketClient::onFail(ConnectionHandle hdl) {
 	}
 }
 // Set Callbacks
-void WebSocketClient::setOnMessageCallback(std::function<void(const NetworkMessage&)> callback) {
+void WebSocketClient::SetOnMessageCallback(std::function<void(const NetworkMessage&)> callback) {
 	onMessageCallback = callback;
 }
 
-void WebSocketClient::setOnConnectCallback(std::function<void()> callback) {
+void WebSocketClient::SetOnConnectCallback(std::function<void()> callback) {
 	onConnectCallback = callback;
 }
 
-void WebSocketClient::setOnDisconnectCallback(std::function<void()> callback) {
+void WebSocketClient::SetOnDisconnectCallback(std::function<void()> callback) {
 	onDisconnectCallback = callback;
 }
 
@@ -181,10 +181,10 @@ WebSocketClient::WebSocketClient() : socketId(-1), connected(false) {
 
 WebSocketClient::~WebSocketClient() {
 	std::cout << "WebSocketClient (Emscripten): Destructor called" << std::endl;
-	disconnect();
+	Disconnect();
 }
 
-void WebSocketClient::connect(const std::string& uri) {
+void WebSocketClient::Connect(const std::string& uri) {
 	if (socketId >= 0) {
 		std::cerr << "WebSocketClient: Already connected or connecting" << std::endl;
 		return;
@@ -220,7 +220,7 @@ void WebSocketClient::connect(const std::string& uri) {
 	std::cout << "WebSocketClient (Emscripten): Connection initiated (socket id: " << socketId << ")" << std::endl;
 }
 
-void WebSocketClient::disconnect() {
+void WebSocketClient::Disconnect() {
 	if (socketId >= 0) {
 		std::cout << "WebSocketClient (Emscripten): Disconnecting..." << std::endl;
 		emscripten_websocket_close(socketId, 1000, "Client disconnecting");
@@ -230,7 +230,7 @@ void WebSocketClient::disconnect() {
 	}
 }
 
-void WebSocketClient::sendMessage(const NetworkMessage& msg) {
+void WebSocketClient::SendNetworkMessage(const NetworkMessage& msg) {
 	if (!connected || socketId < 0) {
 		std::cerr << "Cannot send message: not connected" << std::endl;
 		return;
@@ -250,15 +250,15 @@ void WebSocketClient::sendMessage(const NetworkMessage& msg) {
 	}
 }
 
-void WebSocketClient::setOnMessageCallback(std::function<void(const NetworkMessage&)> callback) {
+void WebSocketClient::SetOnMessageCallback(std::function<void(const NetworkMessage&)> callback) {
 	onMessageCallback = callback;
 }
 
-void WebSocketClient::setOnConnectCallback(std::function<void()> callback) {
+void WebSocketClient::SetOnConnectCallback(std::function<void()> callback) {
 	onConnectCallback = callback;
 }
 
-void WebSocketClient::setOnDisconnectCallback(std::function<void()> callback) {
+void WebSocketClient::SetOnDisconnectCallback(std::function<void()> callback) {
 	onDisconnectCallback = callback;
 }
 

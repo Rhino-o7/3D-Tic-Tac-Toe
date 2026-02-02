@@ -5,13 +5,13 @@
 
 class AI {
 private:
-	Player aiPlayer;
-	Board* gameBoard;
-	int skillLevel;
-	int minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, int maxDepth);
+	Player m_AIPlayer;
+	Board* m_GameBoard;
+	int m_SkillLevel;
+	int Minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, int maxDepth);
 public:
-	AI(Player playerType, Board* board, int skillLvl) : aiPlayer(playerType), gameBoard(board), skillLevel(skillLvl) {}
-	std::tuple<int, int, int> getBestMove();
-	Player getPlayerType() const { return aiPlayer; }
+	AI(Player playerType, Board* board, int skillLvl) : m_AIPlayer(playerType), m_GameBoard(board), m_SkillLevel(skillLvl) {}
+	std::tuple<int, int, int> GetBestMove();
+	Player GetPlayerType() const { return m_AIPlayer; }
 	
 };

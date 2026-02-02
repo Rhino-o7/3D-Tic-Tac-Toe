@@ -70,8 +70,5 @@ To compile the Emscripten version of the build:
 1. Navigate to the `Client` folder
 2. Run the `emccBuild.bat` file
 
-### Ubuntu Build (WSL)
-
-To build the server for Ubuntu using WSL, use the CMAKE project included in the repository.
 
 

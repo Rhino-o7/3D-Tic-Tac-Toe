@@ -18,18 +18,20 @@ This project consists of two programs:
 
 ### Running the Server
 
-1. Launch the server program
+1. Launch the server program inside the `Builds` folder
 2. When prompted, enter the port number you want the server to run on (e.g., `9003`)
 3. The server will start and wait for client connections
 
 ### Running the Client
 
-1. Launch the client program or load the webpage
+1. Launch the client program or load the webpage inside the `Builds` folder
 2. Connect to the server using the WebSocket address format: `ws://<server-address>:<port>`
    - Example: `ws://ryno.com:9003`
    - **Note**: The `ws://` prefix is required
 3. Once connected, select whether you want to play as **X** or **O**
    - X will always goes first
+**Note**: To run the web version of the build you must run it through a server envirement
+   - Example: In directory of the index.html enter the command `python -m http.server 8080` and go to `http://localhost:8080`
 
 ## How to Play
 

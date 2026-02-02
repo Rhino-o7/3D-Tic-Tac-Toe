@@ -30,7 +30,7 @@ This project consists of two programs:
    - **Note**: The `ws://` prefix is required
 3. Once connected, select whether you want to play as **X** or **O**
    - X will always goes first
-**Note**: To run the web version of the build you must run it through a server envirement
+- **Note**: To run the web version of the build you must run it through a server envirement
    - Example: In directory of the index.html enter the command `python -m http.server 8080` and go to `http://localhost:8080`
 
 ## How to Play

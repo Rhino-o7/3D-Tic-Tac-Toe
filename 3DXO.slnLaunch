@@ -3,7 +3,7 @@
     "Name": "New Profile",
     "Projects": [
       {
-        "Path": "Server\\Server.vcxproj",
+        "Path": "Client\\Client.vcxproj",
         "Action": "Start",
         "DebugTarget": "Local Windows Debugger"
       }

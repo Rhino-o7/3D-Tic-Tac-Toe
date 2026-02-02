@@ -26,11 +26,11 @@ struct GameStateData {
 
 class NetworkMessage {
 public:
-	NetworkMessage(MessageType msg_type) : msg_type(msg_type), payload("") {}
-	NetworkMessage(MessageType msg_type, const std::string &payload) : msg_type(msg_type), payload(payload) {};
+	NetworkMessage(MessageType msg_type) : msg_type(msg_type), m_Payload("") {}
+	NetworkMessage(MessageType msg_type, const std::string &payload) : msg_type(msg_type), m_Payload(payload) {};
 
 	MessageType getMessageType() const { return msg_type; }
-	std::string getPayload() const { return payload; }
+	std::string getPayload() const { return m_Payload; }
 
 	// Serialization
 	std::string serialize() const;
@@ -49,5 +49,5 @@ public:
 
 private:
 	MessageType msg_type;
-	std::string payload;
+	std::string m_Payload;
 };

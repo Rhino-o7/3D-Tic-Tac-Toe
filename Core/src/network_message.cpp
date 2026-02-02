@@ -6,7 +6,7 @@
 
 std::string NetworkMessage::serialize() const {
 	std::ostringstream oss;
-	oss << static_cast<int>(msg_type) << "|" << payload.size() << "|" << payload;
+	oss << static_cast<int>(msg_type) << "|" << m_Payload.size() << "|" << m_Payload;
 	return oss.str();
 
 	// "2|12|X,1,2,3,..." <- (MessageType=2, length=12, data="X,1,2,3...")
@@ -80,7 +80,7 @@ MoveData NetworkMessage::parseMoveData() const {
 		throw std::runtime_error("Cannot parse MoveData from non-MOVE message");
 	}
 
-	std::istringstream iss(payload);
+	std::istringstream iss(m_Payload);
 	MoveData move;
 	int playerInt;
 	char comma;
@@ -101,7 +101,7 @@ GameStateData NetworkMessage::parseGameStateData() const {
 		throw std::runtime_error(" Trying to parseGameStateData() a not GAME_STATE message");
 	}
 
-	std::istringstream iss(payload);
+	std::istringstream iss(m_Payload);
 	GameStateData state;
 	char comma, pipe;
 
@@ -141,5 +141,5 @@ Player NetworkMessage::parsePlayerChoice() const {
 		throw std::runtime_error("Wrong message type for parsePlayerChoice");
 	}
 
-	return static_cast<Player>(std::stoi(payload));
+	return static_cast<Player>(std::stoi(m_Payload));
 }

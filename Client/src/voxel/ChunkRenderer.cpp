@@ -29,7 +29,7 @@ ChunkRenderer::ChunkRenderer(float aspectRatio)
 	m_CameraTarget(0.0f),
 	m_CameraYaw(45.0f),
 	m_CameraPitch(30.0f),
-	m_CameraDistance(30.0f),
+	m_CameraDistance(100.0f),
 	m_HasGeometry(false)
 {
 	m_ClearColor[0] = 0.05f;
@@ -161,9 +161,10 @@ void ChunkRenderer::LoadChunks(const std::vector<Mesh>& meshes,
 	m_CameraTarget = m_SceneCenter;
 	m_Camera.SetTarget(m_CameraTarget);
 
-	const float sceneSpan = glm::length(maxBounds - minBounds);
+	/*const float sceneSpan = glm::length(maxBounds - minBounds);
 	const float chunkExtent = glm::max(glm::max(chunkSize.x, chunkSize.y), chunkSize.z);
-	m_CameraDistance = glm::max(sceneSpan * 0.6f, chunkExtent * 2.0f);
+	m_CameraDistance = glm::max(sceneSpan * 0.6f, chunkExtent * 2.0f);*/
+	m_CameraDistance = 120.0f;
 
 	UpdateCameraFromOrbit();
 }

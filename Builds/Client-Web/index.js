@@ -71,7 +71,7 @@ var ENVIRONMENT_IS_SHELL = !ENVIRONMENT_IS_WEB && !ENVIRONMENT_IS_NODE && !ENVIR
 
 // --pre-jses are emitted after the Module integration code, so that they can
 // refer to Module (if they choose; they can also define Module)
-// include: C:\Users\r2osb\AppData\Local\Temp\tmpqgpa9div.js
+// include: C:\Users\r2osb\AppData\Local\Temp\tmpqj0djzcg.js
 
   if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
   Module['expectedDataFileDownloads']++;
@@ -206,21 +206,21 @@ Module['FS_createPath']("/res", "textures", true, true);
 
   })();
 
-// end include: C:\Users\r2osb\AppData\Local\Temp\tmpqgpa9div.js
-// include: C:\Users\r2osb\AppData\Local\Temp\tmprtshrsyn.js
+// end include: C:\Users\r2osb\AppData\Local\Temp\tmpqj0djzcg.js
+// include: C:\Users\r2osb\AppData\Local\Temp\tmp6pbqpv_8.js
 
     // All the pre-js content up to here must remain later on, we need to run
     // it.
     if ((typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER) || (typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD) || (typeof ENVIRONMENT_IS_AUDIO_WORKLET != 'undefined' && ENVIRONMENT_IS_AUDIO_WORKLET)) Module['preRun'] = [];
     var necessaryPreJSTasks = Module['preRun'].slice();
-  // end include: C:\Users\r2osb\AppData\Local\Temp\tmprtshrsyn.js
-// include: C:\Users\r2osb\AppData\Local\Temp\tmp81s80tzo.js
+  // end include: C:\Users\r2osb\AppData\Local\Temp\tmp6pbqpv_8.js
+// include: C:\Users\r2osb\AppData\Local\Temp\tmp40q1ahou.js
 
     if (!Module['preRun']) throw 'Module.preRun should exist because file support used it; did a pre-js delete it?';
     necessaryPreJSTasks.forEach((task) => {
       if (Module['preRun'].indexOf(task) < 0) throw 'All preRun tasks that exist before user pre-js code should remain after; did you replace Module or modify Module.preRun?';
     });
-  // end include: C:\Users\r2osb\AppData\Local\Temp\tmp81s80tzo.js
+  // end include: C:\Users\r2osb\AppData\Local\Temp\tmp40q1ahou.js
 
 
 var arguments_ = [];

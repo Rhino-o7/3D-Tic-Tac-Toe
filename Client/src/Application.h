@@ -65,12 +65,11 @@ private:
 	std::size_t m_SelectedChunkIndex;
 	VoxelClient m_VoxelClient;
 	std::thread m_GameThread;
-	int m_MoveIndexes[3] = { 0, 0, 0 };
 	std::atomic<bool> m_NeedsUpdate{ false };
 	bool m_LastRightMouseState = false;
 	std::optional<std::size_t> m_HoveredChunkIndex;
 	
-	// Connection and game state (thread-safe)
+	// Connection and game states
 	std::atomic<GameState> m_GameState;
 	mutable std::mutex m_StatusMutex;
 	std::string m_ServerAddress;

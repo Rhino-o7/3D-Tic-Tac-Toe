@@ -1,6 +1,4 @@
-﻿# CMakeList.txt : CMake project for ServerLinux, include source and define
-# project specific logic here.
-#
+﻿# CMakeList.txt : CMake project for Server
 
 # Add source to this project's executable.
 file(GLOB_RECURSE SERVER_LINUX_SOURCES
@@ -11,7 +9,7 @@ file(GLOB_RECURSE SERVER_LINUX_SOURCES
 )
 
 add_executable(ServerLinux
-    ${SERVER_LINUX_SOURCES}
+    ${SERVER_SOURCES}
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
@@ -24,4 +22,4 @@ target_link_libraries(ServerLinux
         dep
 )
 
-# TODO: Add tests and install targets if needed.
+

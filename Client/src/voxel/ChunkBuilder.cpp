@@ -2,7 +2,7 @@
 
 #include <utility>
 
-ChunkBuilder::ChunkBuilder() = default;
+
 
 void ChunkBuilder::BuildChunks()
 {

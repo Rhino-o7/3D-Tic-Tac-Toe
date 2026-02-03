@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <unordered_map>
-#include <glm.hpp>
 #include "Voxel.h"
 #include "rendering/Texture.h"
 
@@ -19,7 +18,6 @@ class TextureAtlas
 {
 public:
 	TextureAtlas();
-	~TextureAtlas() = default;
 
 	void Initialize(const std::string& atlasPath, int tilesX, int tilesY);
 	void MapVoxelTexture(VoxelType type, int tileX, int tileY);
@@ -31,8 +29,8 @@ public:
 private:
 	std::unique_ptr<Texture> m_AtlasTexture;
 	std::unordered_map<VoxelType, TextureCoords> m_VoxelTextureMap;
-	int m_TilesX{ 1 };
-	int m_TilesY{ 1 };
-	float m_TileWidth{ 1.0f };
-	float m_TileHeight{ 1.0f };
+	int m_TilesX;
+	int m_TilesY;
+	float m_TileWidth;
+	float m_TileHeight;
 };

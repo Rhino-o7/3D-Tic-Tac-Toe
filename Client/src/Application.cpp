@@ -1,6 +1,9 @@
 #include "Application.h"
 #include <imgui.h>
 #include <iostream>
+#ifndef __EMSCRIPTEN__
+    #include <thread>
+#endif
 
 Application::Application(int windowWidth, int windowHeight) :
     m_Renderer((float)windowWidth / (float)windowHeight),
@@ -22,27 +25,27 @@ Application::Application(int windowWidth, int windowHeight) :
         m_Builder.GetChunkOffsets(),
         m_Builder.GetChunkSize());
     
-    // Set callback for when game state changes
+    // Set callback for game state changes
     m_VoxelClient.SetOnStateChangeCallback([this]() {
        m_NeedsUpdate.store(true, std::memory_order_release);
     });
 }
 
 Application::~Application() {
-	// Clear hover state before destruction
-	if (m_HoveredChunkIndex.has_value()) {
-		if (Chunk* chunk = m_Builder.GetChunk(m_HoveredChunkIndex.value())) {
-			chunk->ClearChunkHover();
-		}
-	}
-	
-	// Stop the game loop before joining the thread
-	m_VoxelClient.StopGameLoop();
-	
-	// Wait for game thread to finish
-	if (m_GameThread.joinable()) {
-		m_GameThread.join();
-	}
+    // Clear hover
+    if (m_HoveredChunkIndex.has_value()) {
+        if (Chunk* chunk = m_Builder.GetChunk(m_HoveredChunkIndex.value())) {
+            chunk->ClearChunkHover();
+        }
+    }
+
+#ifndef __EMSCRIPTEN__
+
+    m_VoxelClient.StopGameLoop();
+    if (m_GameThread.joinable()) {
+        m_GameThread.join();
+    }
+#endif
 }
 
 void Application::SetGameState(GameState state)
@@ -71,7 +74,7 @@ void Application::OnUpdate(float deltaTime)
 {
 	m_Renderer.OnUpdate(deltaTime);
 	
-	// Check for disconnection during active states
+	// Check for disconnection
 	GameState currentState = GetGameState();
 	if (currentState == GameState::WaitingForPlayerChoice || 
 	    currentState == GameState::Playing || 
@@ -79,19 +82,15 @@ void Application::OnUpdate(float deltaTime)
 		CheckDisconnection();
 	}
 	
-	// Only handle game input when playing
 	if (currentState == GameState::Playing) {
-		// Check if game is over
 		CheckGameOver();
 		
-		// Update hover state continuously
 		UpdateHoverState();
 		
-		// Handle mouse input for raycasting (clicks)
 		HandleMouseInput();
 	}
 	
-	// Automatically update chunks when state changes
+	// Update chunks 
 	if (m_NeedsUpdate) {
 		UpdateChunksFromBoard();
 		m_NeedsUpdate = false;
@@ -100,64 +99,72 @@ void Application::OnUpdate(float deltaTime)
 
 void Application::ConnectToServer()
 {
-	SetGameState(GameState::Connecting);
-	SetConnectionStatus("Connecting...");
-	
-	// Launch connection on separate thread to avoid freezing UI
-	std::thread connectionThread([this]() {
-		// Connect to server (this is blocking)
-		if (m_VoxelClient.connectToServer(m_ServerAddress)) {
-			// Start game loop on separate thread
-			m_GameThread = std::thread([this]() {
-				m_VoxelClient.StartGameLoop();
-			});
-			
-			SetGameState(GameState::WaitingForPlayerChoice);
-			SetConnectionStatus("Connected! Choose your player.");
-		} else {
-			SetGameState(GameState::NotConnected);
-			SetConnectionStatus("Failed to connect to server.");
-		}
-	});
-	
-	// Detach the connection thread so it runs independently
-	connectionThread.detach();
+    SetGameState(GameState::Connecting);
+    SetConnectionStatus("Connecting...");
+
+#ifdef __EMSCRIPTEN__
+    // Web build: Connection is async
+    if (m_VoxelClient.connectToServer(m_ServerAddress)) {
+        // Connection initiated
+        SetGameState(GameState::WaitingForPlayerChoice);
+        SetConnectionStatus("Connected! Choose your player.");
+    } else {
+        SetGameState(GameState::NotConnected);
+        SetConnectionStatus("Failed to connect to server.");
+    }
+#else
+    std::thread connectionThread([this]() {
+        // Connect to server 
+        if (m_VoxelClient.connectToServer(m_ServerAddress)) {
+            // Start game loop on thread
+            m_GameThread = std::thread([this]() {
+                m_VoxelClient.StartGameLoop();
+            });
+
+            SetGameState(GameState::WaitingForPlayerChoice);
+            SetConnectionStatus("Connected! Choose your player.");
+        } else {
+            SetGameState(GameState::NotConnected);
+            SetConnectionStatus("Failed to connect to server.");
+        }
+    });
+    connectionThread.detach();
+#endif
 }
 
 void Application::DisconnectFromServer()
 {
-	// Stop the game loop
-	m_VoxelClient.StopGameLoop();
-	
-	// Wait for game thread to finish
-	if (m_GameThread.joinable()) {
-		m_GameThread.join();
-	}
-	
-	// Rebuild all chunks from scratch to restore initial state
-	m_Builder.BuildChunks();
-	m_Builder.BuildChunksMesh();
-	
-	// Reload chunks in renderer
-	m_Renderer.LoadChunks(
-		m_Builder.GetChunkMeshes(),
-		m_Builder.GetChunkOffsets(),
-		m_Builder.GetChunkSize());
-	
-	// Reset state
-	SetGameState(GameState::NotConnected);
-	SetConnectionStatus("Not connected");
-	m_Winner = Player::NONE;
-	m_HoveredChunkIndex = std::nullopt;
+#ifndef __EMSCRIPTEN__
+    m_VoxelClient.StopGameLoop();
+
+    if (m_GameThread.joinable()) {
+        m_GameThread.join();
+    }
+#endif
+
+    // Rebuild chunks
+    m_Builder.BuildChunks();
+    m_Builder.BuildChunksMesh();
+
+    // Reload renderer
+    m_Renderer.LoadChunks(
+        m_Builder.GetChunkMeshes(),
+        m_Builder.GetChunkOffsets(),
+        m_Builder.GetChunkSize());
+
+    // Reset state
+    SetGameState(GameState::NotConnected);
+    SetConnectionStatus("Not connected");
+    m_Winner = Player::NONE;
+    m_HoveredChunkIndex = std::nullopt;
 }
 
 void Application::CheckDisconnection()
 {
-	// Check if we've lost connection to the server
 	if (!m_VoxelClient.IsConnected()) {
 		std::cout << "Server disconnected! Returning to menu..." << std::endl;
 		
-		// Clear hover state
+		// Clear hover 
 		if (m_HoveredChunkIndex.has_value()) {
 			if (Chunk* chunk = m_Builder.GetChunk(m_HoveredChunkIndex.value())) {
 				chunk->ClearChunkHover();
@@ -166,7 +173,6 @@ void Application::CheckDisconnection()
 			m_HoveredChunkIndex = std::nullopt;
 		}
 		
-		// Clean up and return to menu
 		DisconnectFromServer();
 		SetConnectionStatus("Server disconnected.");
 	}
@@ -184,7 +190,7 @@ void Application::CheckGameOver()
 		SetGameState(GameState::GameOver);
 		m_Winner = gameState.winner;
 		
-		// Clear hover state
+		// Clear hover 
 		if (m_HoveredChunkIndex.has_value()) {
 			if (Chunk* chunk = m_Builder.GetChunk(m_HoveredChunkIndex.value())) {
 				chunk->ClearChunkHover();
@@ -193,7 +199,7 @@ void Application::CheckGameOver()
 			m_HoveredChunkIndex = std::nullopt;
 		}
 		
-		// Update connection status
+		// Update connection 
 		if (m_Winner == Player::NONE) {
 			SetConnectionStatus("Game Over - Draw!");
 		} else {
@@ -206,9 +212,7 @@ void Application::UpdateHoverState()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	
-	// Only process if not hovering over ImGui window
 	if (io.WantCaptureMouse) {
-		// Clear hover if mouse is over UI
 		if (m_HoveredChunkIndex.has_value()) {
 			if (Chunk* chunk = m_Builder.GetChunk(m_HoveredChunkIndex.value())) {
 				chunk->ClearChunkHover();
@@ -219,21 +223,19 @@ void Application::UpdateHoverState()
 		return;
 	}
 	
-	// Get mouse position
+	// mouse position
 	double mouseX = io.MousePos.x;
 	double mouseY = io.MousePos.y;
 	
-	// Create ray from camera through mouse position
+	// Create ray from camera 
 	Ray ray = ScreenToWorldRay(mouseX, mouseY, m_WindowWidth, m_WindowHeight);
-	
-	// Raycast against all chunks
 	RayHit hit = RaycastChunks(ray);
 	
 	std::optional<std::size_t> newHoveredIndex = hit.hit ? std::optional<std::size_t>(hit.chunkIndex) : std::nullopt;
 	
 	// Check if hover state changed
 	if (newHoveredIndex != m_HoveredChunkIndex) {
-		// Clear previous hover
+		// Clear previous
 		if (m_HoveredChunkIndex.has_value()) {
 			if (Chunk* chunk = m_Builder.GetChunk(m_HoveredChunkIndex.value())) {
 				chunk->ClearChunkHover();
@@ -241,7 +243,7 @@ void Application::UpdateHoverState()
 			}
 		}
 		
-		// Set new hover
+		// Set hover
 		if (newHoveredIndex.has_value()) {
 			if (Chunk* chunk = m_Builder.GetChunk(newHoveredIndex.value())) {
 				chunk->SetChunkHover();
@@ -257,23 +259,19 @@ void Application::HandleMouseInput()
 {
 	ImGuiIO& io = ImGui::GetIO();
 	
-	// Only process if not hovering over ImGui window
 	if (io.WantCaptureMouse) {
 		return;
 	}
 	
-	bool currentRightMouseState = ImGui::IsMouseDown(ImGuiMouseButton_Right);
+	bool currentRightMouseState = ImGui::IsMouseDown(ImGuiMouseButton_Left);
 	
-	// Detect right-click (button pressed this frame)
+	// Click 
 	if (currentRightMouseState && !m_LastRightMouseState) {
-		// Get mouse position
 		double mouseX = io.MousePos.x;
 		double mouseY = io.MousePos.y;
 		
-		// Create ray from camera through mouse position
+		// Create ray from camera 
 		Ray ray = ScreenToWorldRay(mouseX, mouseY, m_WindowWidth, m_WindowHeight);
-		
-		// Raycast against all chunks
 		RayHit hit = RaycastChunks(ray);
 		
 		if (hit.hit) {
@@ -292,12 +290,12 @@ void Application::HandleMouseInput()
 	m_LastRightMouseState = currentRightMouseState;
 }
 
+// Convert screen coordinates to a world ray
 Application::Ray Application::ScreenToWorldRay(double mouseX, double mouseY, int screenWidth, int screenHeight)
 {
-	// Get camera matrices from renderer
 	const Camera& camera = m_Renderer.GetCamera();
 	
-	// Convert screen coordinates to normalized device coordinates (NDC)
+	// Convert screen coordinates to normalized device coordinates
 	float ndcX = (2.0f * mouseX) / screenWidth - 1.0f;
 	float ndcY = 1.0f - (2.0f * mouseY) / screenHeight;
 	
@@ -321,6 +319,7 @@ Application::Ray Application::ScreenToWorldRay(double mouseX, double mouseY, int
 	return ray;
 }
 
+// Get the closest chunk hit by the ray
 Application::RayHit Application::RaycastChunks(const Ray& ray)
 {
 	RayHit closestHit;
@@ -330,7 +329,6 @@ Application::RayHit Application::RaycastChunks(const Ray& ray)
 	const glm::uvec3 gridSize = m_Builder.GetChunkGridSize();
 	const glm::ivec3 chunkSize = m_Builder.GetChunkSize();
 	
-	// Get game state to check which chunks are playable
 	GameStateData gameState = m_VoxelClient.GetLastGameState();
 	bool hasGameState = m_VoxelClient.IsConnected();
 	
@@ -340,30 +338,24 @@ Application::RayHit Application::RaycastChunks(const Ray& ray)
 	for (int x = 0; x < static_cast<int>(gridSize.x); ++x) {
 		for (int y = 0; y < static_cast<int>(gridSize.y); ++y) {
 			for (int z = 0; z < static_cast<int>(gridSize.z); ++z) {
-				// Check if this chunk is empty
+				// Check for empty chunk
 				bool isEmpty = false;
 				if (hasGameState && x >= 0 && x < 3 && y >= 0 && y < 3 && z >= 0 && z < 3) {
 					isEmpty = (gameState.board[x][y][z] == Player::NONE);
 				} else if (!hasGameState) {
-					isEmpty = true; // Treat all as empty if not connected
+					isEmpty = true; 
 				}
 				
-				// Skip non-empty chunks
 				if (!isEmpty) continue;
 				
-				// Calculate chunk index
-				std::size_t chunkIndex = x + y * gridSize.x + z * gridSize.x * gridSize.y;
-				
-				// Get chunk offset
+				std::size_t chunkIndex = x + y * gridSize.x + z * gridSize.x * gridSize.y;				
 				const glm::vec3* offset = m_Builder.GetChunkOffset(chunkIndex);
+
 				if (!offset) continue;
-				
-				// Calculate chunk center
+
 				glm::vec3 chunkCenter = *offset + glm::vec3(chunkSize) * 0.5f;
 				
 				// Calculate distance from chunk center to ray line
-				// Using formula: distance = ||(P - A) - ((P - A) · d) * d||
-				// where P = point (chunk center), A = ray origin, d = ray direction
 				glm::vec3 AP = chunkCenter - ray.origin;
 				float projection = glm::dot(AP, ray.direction);
 				
@@ -377,7 +369,7 @@ Application::RayHit Application::RaycastChunks(const Ray& ray)
 				if (distanceToRay < closestDistanceToRay) {
 					closestDistanceToRay = distanceToRay;
 					closestHit.hit = true;
-					closestHit.distance = projection; // Use projection as distance for consistency
+					closestHit.distance = projection; 
 					closestHit.chunkCoords = glm::ivec3(x, y, z);
 					closestHit.chunkIndex = chunkIndex;
 				}
@@ -390,13 +382,12 @@ Application::RayHit Application::RaycastChunks(const Ray& ray)
 
 bool Application::RayAABBIntersection(const Ray& ray, const glm::vec3& aabbMin, const glm::vec3& aabbMax, float& tMin)
 {
-	// Optimized ray-AABB intersection (slab method)
 	float tMinCalc = 0.0f;
 	float tMaxCalc = std::numeric_limits<float>::max();
 	
 	for (int i = 0; i < 3; ++i) {
 		if (abs(ray.direction[i]) < 1e-8f) {
-			// Ray is parallel to slab, check if origin is within bounds
+			// Ray is parallel to slab: check if origin is within bounds
 			if (ray.origin[i] < aabbMin[i] || ray.origin[i] > aabbMax[i]) {
 				return false;
 			}
@@ -427,7 +418,7 @@ void Application::OnRender()
 
 void Application::OnImGuiRender()
 {
-	m_Renderer.OnImGuiRender();
+	//m_Renderer.OnImGuiRender();
 
 	ImGui::Begin("3D Tic-Tac-Toe");
 	
@@ -438,7 +429,7 @@ void Application::OnImGuiRender()
 	if (currentState == GameState::NotConnected) {
 		ImGui::SeparatorText("Connect to Server");
 		
-		// Show status message (might be error or normal)
+		// Show status message
 		if (currentStatus != "Not connected") {
 			ImVec4 color = (currentStatus.find("Failed") != std::string::npos || 
 			                currentStatus.find("disconnected") != std::string::npos) 
@@ -450,7 +441,6 @@ void Application::OnImGuiRender()
 		
 		ImGui::Text("Enter server address:");
 		
-		// ImGui::InputText requires a buffer, so we use InputTextCallback or resize the string
 		// Reserve space for input and use .data() as mutable buffer
 		m_ServerAddress.reserve(256);
 		if (ImGui::InputText("##ServerAddress", m_ServerAddress.data(), m_ServerAddress.capacity() + 1)) {
@@ -499,7 +489,7 @@ void Application::OnImGuiRender()
 		ImGui::Spacing();
 		ImGui::Spacing();
 		
-		// Display winner with color
+		// Display winner 
 		if (m_Winner == Player::NONE) {
 			ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "It's a Draw!");
 		} else if (m_Winner == Player::X) {
@@ -550,70 +540,6 @@ void Application::OnImGuiRender()
 		} else {
 			ImGui::TextDisabled("Hovering: None");
 		}
-		
-		ImGui::SeparatorText("Manual Move");
-		
-		ImGui::SliderInt("X", &m_MoveIndexes[0], 0, 2);
-		ImGui::SliderInt("Y", &m_MoveIndexes[1], 0, 2);
-		ImGui::SliderInt("Z", &m_MoveIndexes[2], 0, 2);
-		
-		if (ImGui::Button("Send Move (Manual)", ImVec2(200, 30))) {
-			if (m_VoxelClient.SendMove(m_MoveIndexes[0], m_MoveIndexes[1], m_MoveIndexes[2])) {
-				std::cout << "Move sent: (" << m_MoveIndexes[0] << ", " 
-				          << m_MoveIndexes[1] << ", " << m_MoveIndexes[2] << ")\n";
-			} else {
-				std::cout << "Not your turn or unable to send move.\n";
-			}
-		}
-
-		ImGui::SeparatorText("Debug - Chunk Editing");
-
-		const std::size_t chunkCount = m_Builder.GetChunkCount();
-		if (chunkCount > 0) {
-			int chunkIndex = static_cast<int>(m_SelectedChunkIndex);
-			if (ImGui::SliderInt("Chunk Index", &chunkIndex, 0, static_cast<int>(chunkCount) - 1)) {
-				m_SelectedChunkIndex = static_cast<std::size_t>(chunkIndex);
-			}
-
-			if (ImGui::Button("Randomize")) {
-				if (Chunk* chunk = m_Builder.GetChunk(m_SelectedChunkIndex)) {
-					chunk->SetChunkSomeSolid();
-					RebuildAndUploadChunk(m_SelectedChunkIndex);
-				}
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Solid")) {
-				if (Chunk* chunk = m_Builder.GetChunk(m_SelectedChunkIndex)) {
-					chunk->SetChunkSolid();
-					RebuildAndUploadChunk(m_SelectedChunkIndex);
-				}
-			}
-
-			ImGui::SameLine();
-			if (ImGui::Button("Clear")) {
-				if (Chunk* chunk = m_Builder.GetChunk(m_SelectedChunkIndex)) {
-					FillChunk(*chunk, VoxelType::Air);
-					RebuildAndUploadChunk(m_SelectedChunkIndex);
-				}
-			}
-			
-			ImGui::SameLine();
-			if (ImGui::Button("Sphere")) {
-				if (Chunk* chunk = m_Builder.GetChunk(m_SelectedChunkIndex)) {
-					chunk->SetChunkPlayer(Player::O);
-					RebuildAndUploadChunk(m_SelectedChunkIndex);
-				}
-			}
-			
-			ImGui::SameLine();
-			if (ImGui::Button("X")) {
-				if (Chunk* chunk = m_Builder.GetChunk(m_SelectedChunkIndex)) {
-					chunk->SetChunkPlayer(Player::X);
-					RebuildAndUploadChunk(m_SelectedChunkIndex);
-				}
-			}
-		}
 	}
 	// Connecting UI
 	else if (currentState == GameState::Connecting) {
@@ -642,21 +568,17 @@ void Application::UpdateChunksFromBoard()
 		int y = static_cast<int>(chunkPos.y);
 		int z = static_cast<int>(chunkPos.z);
 
-		// Validate coordinates
+		// error check
 		if (x < 0 || x >= 3 || y < 0 || y >= 3 || z < 0 || z >= 3) {
 			continue;
 		}
-
-		// Calculate chunk index
 		std::size_t chunkIndex = x + y * gridSize.x + z * gridSize.x * gridSize.y;
-		
 		Chunk* chunk = m_Builder.GetChunk(chunkIndex);
+
 		if (chunk) {
-			// Update chunk with player from board
+			// Update chunk
 			Player cellPlayer = gameState.board[x][y][z];
 			chunk->SetChunkPlayer(cellPlayer);
-			
-			// Rebuild and upload the mesh
 			RebuildAndUploadChunk(chunkIndex);
 		}
 	}
@@ -693,6 +615,5 @@ void Application::OnResize(int width, int height)
     float aspect = (height != 0) ? static_cast<float>(width) / static_cast<float>(height) : 1.0f;
     m_Renderer.SetAspectRatio(aspect);
 
-    // Update the OpenGL viewport
     glViewport(0, 0, width, height);
 }

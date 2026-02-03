@@ -4,9 +4,8 @@
 #include <tuple>
 #include <limits>
 #include <iostream>
-#include <random> // ADD THIS
+#include <random> 
 
-constexpr int MAX_DEPTH = 2;
 constexpr int WIN_SCORE = 100;
 
 // use to iteratre over board instead of nested loops
@@ -16,13 +15,13 @@ static inline void toXYZ(int idx, int& x, int& y, int& z) {
     z = idx % 3;
 }
 
-int AI::minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, int maxDepth) {
+int AI::Minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, int maxDepth) {
     Player winner = board.checkWin();
-    Player opponent = (aiPlayer == Player::X) ? Player::O : Player::X;
+    Player opponent = (m_AIPlayer == Player::X) ? Player::O : Player::X;
 
     // Return win/loss score
     if (winner != Player::NONE) {
-        return (winner == aiPlayer) ? (WIN_SCORE - depth) : (depth - WIN_SCORE);
+        return (winner == m_AIPlayer) ? (WIN_SCORE - depth) : (depth - WIN_SCORE);
     }
 
     if (board.isFull() || depth >= maxDepth) {
@@ -30,7 +29,7 @@ int AI::minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, 
     }
 
     // minmax + pruning
-    const Player current = isMaximizing ? aiPlayer : opponent;
+    const Player current = isMaximizing ? m_AIPlayer : opponent;
     int best = isMaximizing ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
 
     for (int idx = 0; idx < 27; ++idx) {
@@ -40,7 +39,7 @@ int AI::minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, 
         }
 
         board.placeMark(current, x, y, z);
-        int score = minimax(board, depth + 1, !isMaximizing, alpha, beta, maxDepth);
+        int score = Minimax(board, depth + 1, !isMaximizing, alpha, beta, maxDepth);
 
         best = isMaximizing ? std::max(best, score) : std::min(best, score);
 
@@ -60,9 +59,9 @@ int AI::minimax(Board board, int depth, bool isMaximizing, int alpha, int beta, 
     return best;
 }
 
-std::tuple<int, int, int> AI::getBestMove() {
-    Board tmpBoard(*gameBoard);
-    Player opponent = (aiPlayer == Player::X) ? Player::O : Player::X;
+std::tuple<int, int, int> AI::GetBestMove() {
+    Board tmpBoard(*m_GameBoard);
+    Player opponent = (m_AIPlayer == Player::X) ? Player::O : Player::X;
 
     std::cout << std::endl;
 
@@ -73,8 +72,8 @@ std::tuple<int, int, int> AI::getBestMove() {
     for (int idx = 0; idx < 27; ++idx) {
         int x, y, z; toXYZ(idx, x, y, z);
         if (tmpBoard.getCell(x, y, z) == Player::NONE) {
-            tmpBoard.placeMark(aiPlayer, x, y, z);
-            if (tmpBoard.checkWin() == aiPlayer) {
+            tmpBoard.placeMark(m_AIPlayer, x, y, z);
+            if (tmpBoard.checkWin() == m_AIPlayer) {
                 return std::make_tuple(x, y, z);
             }
             tmpBoard.placeMark(Player::NONE, x, y, z);
@@ -93,32 +92,35 @@ std::tuple<int, int, int> AI::getBestMove() {
         }
     }
 
-    std::vector<int> indices(27);
-    for (int i = 0; i < 27; ++i) indices[i] = i;
+    std::vector<std::tuple<int,int,int>> bestMoves;
 
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(indices.begin(), indices.end(), g);
-
-    // Minimax
-    for (int idx : indices) {
+    for (int idx = 0; idx < 27; ++idx) {  // No shuffle
         int x, y, z; toXYZ(idx, x, y, z);
         if (tmpBoard.getCell(x, y, z) == Player::NONE) {
             Board candidateBoard(tmpBoard);
-            candidateBoard.placeMark(aiPlayer, x, y, z);
+            candidateBoard.placeMark(m_AIPlayer, x, y, z);
 
-            int score = minimax(candidateBoard, 1, false,
+            int score = Minimax(candidateBoard, 1, false,
                 std::numeric_limits<int>::min(),
                 std::numeric_limits<int>::max(),
-                MAX_DEPTH);
+                m_SkillLevel);
 
             if (score > bestScore) {
                 bestScore = score;
-                bestX = x;
-                bestY = y;
-                bestZ = z;
+                bestMoves.clear();
+                bestMoves.push_back(std::make_tuple(x, y, z));
+            } else if (score == bestScore) {
+                bestMoves.push_back(std::make_tuple(x, y, z));
             }
         }
+    }
+
+    // Randomly pick from best movesw
+    if (!bestMoves.empty()) {
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::uniform_int_distribution<> dis(0, bestMoves.size() - 1);
+        return bestMoves[dis(g)];
     }
 
     return std::make_tuple(bestX, bestY, bestZ);

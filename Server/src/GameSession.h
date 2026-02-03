@@ -11,22 +11,23 @@ class GameSession {
 public:
 	GameSession(WebSocketServer& server, ConnectionHandle clientHandle);
 
-	void handleMessage(const NetworkMessage& msg);
-	void handleDisconnect();
+	void HandleMessage(const NetworkMessage& msg);
+	void HandleDisconnect();
 
 private:
-	void handlePlayerChoice(Player choice);
-	void handleMove(const MoveData& move);
-	void makeAiTurn();
-	void sendGameState();
+	void HandlePlayerChoice(Player choice);
+	void HandleMove(const MoveData& move);
+	void MakeAiTurn();
+	void SendGameState();
 
-	WebSocketServer& server;
-	ConnectionHandle client;
-	std::mutex sessionMutex;
+	WebSocketServer& m_Server;
+	ConnectionHandle m_Client;
+	std::mutex m_SessionMutex;
 
-	std::unique_ptr<Game> game;
-	std::unique_ptr<AI> ai;
+	std::unique_ptr<Game> m_Game;
+	std::unique_ptr<AI> m_AI;
 
-	Player clientPlayer{ Player::NONE };
-	Player aiPlayer{ Player::NONE };
+	Player m_ClientPlayer{ Player::NONE };
+	Player m_AIPlayer{ Player::NONE };
+	const int m_AIDifficulty{ 5 }; // Depth for minimax
 };

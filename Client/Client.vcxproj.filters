@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ConsoleClient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\WebsocketClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -63,9 +60,6 @@
     <ClCompile Include="src\vendor\imgui\imgui_impl_glfw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\voxel\Voxel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\voxel\Chunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -95,9 +89,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ConsoleClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\WebsocketClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>

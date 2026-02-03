@@ -12,6 +12,6 @@ endif()
 project ("3DXO")
 
 # Include sub-projects.
-add_subdirectory ("ServerLinux")
+add_subdirectory ("Server")
 add_subdirectory("Core")
 add_subdirectory("dep")

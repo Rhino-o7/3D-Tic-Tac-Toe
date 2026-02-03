@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ConsoleClient.h"
+#include "../ConsoleClient.h"
 
 int main(){
 	std::cout << "Client Program\n\n";

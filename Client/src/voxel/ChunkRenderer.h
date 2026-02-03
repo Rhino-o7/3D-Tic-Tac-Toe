@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <memory>
 #include <vector>
 #include <glm.hpp>
@@ -11,7 +10,6 @@
 #include "rendering/VertexBuffer.h"
 #include "rendering/IndexBuffer.h"
 #include "rendering/Shader.h"
-#include "rendering/Texture.h"
 #include "rendering/Camera.h"
 
 struct RenderChunkObj
@@ -38,18 +36,14 @@ public:
 	void OnUpdate(float deltaTime);
 	void OnRender();
 	void OnImGuiRender();
-
 	void SetAspectRatio(float aspectRatio);
 	
-	// Camera access for raycasting
 	const Camera& GetCamera() const { return m_Camera; }
-	
-	// Texture atlas management
 	TextureAtlas& GetTextureAtlas() { return m_TextureAtlas; }
 
 private:
 	void UpdateCameraFromOrbit();
-	void EnsurePipeline();
+	void Validate();
 	RenderChunkObj BuildRenderChunk(const Mesh& mesh, const glm::vec3& offset);
 	void RefreshGeometryState();
 	void Unbind();

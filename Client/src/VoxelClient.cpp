@@ -1,29 +1,30 @@
 #include "VoxelClient.h"
 #include <iostream>
-#include <limits>
-#include <thread>
+#ifndef __EMSCRIPTEN__
+    #include <thread>
+#endif
 #include "WebsocketClient.h"
 
-VoxelClient::VoxelClient() : player(Player::X), connected(false) {
-	client = std::make_unique<WebSocketClient>();
+VoxelClient::VoxelClient() : m_Player(Player::X), m_Connected(false) {
+	m_Client = std::make_unique<WebSocketClient>();
 }
 
 void VoxelClient::onConnect()
 {
 	std::cout << "Connected to server." << std::endl;
-	connected = true;
+	m_Connected = true;
 }
 
 void VoxelClient::onDisconnect()
 {
 	std::cout << "Disconnected from server." << std::endl;
-	connected = false;
+	m_Connected = false;
 	{
-		std::lock_guard<std::mutex> lock(stateMutex);
-		waitingForTurn = false;
-		hasState = false;
+		std::lock_guard<std::mutex> lock(m_StateMutex);
+		m_WaitingForTurn = false;
+		m_HasState = false;
 	}
-	running = false;
+	m_Running = false;
 }
 
 void VoxelClient::onMessage(const NetworkMessage& msg)
@@ -40,9 +41,9 @@ void VoxelClient::onMessage(const NetworkMessage& msg)
 	case MessageType::ERROR_MSG:
 		std::cout << "Server error: " << msg.getPayload() << std::endl;
 		{
-			std::lock_guard<std::mutex> lock(stateMutex);
-			if (hasState && lastState.current_turn == player && !lastState.game_over) {
-				waitingForTurn = true;
+			std::lock_guard<std::mutex> lock(m_StateMutex);
+			if (m_HasState && m_LastState.current_turn == m_Player && !m_LastState.game_over) {
+				m_WaitingForTurn = true;
 			}
 		}
 		break;
@@ -87,11 +88,11 @@ void printBoard(const GameStateData& state)  {
 }
 
 bool VoxelClient::SendMove(int x, int y, int z) {
-	std::lock_guard<std::mutex> lock(stateMutex);
-	if (waitingForTurn) {
-		MoveData move{ player, x, y, z };
-		client->sendMessage(NetworkMessage::createMoveMessage(move));
-		waitingForTurn = false;
+	std::lock_guard<std::mutex> lock(m_StateMutex);
+	if (m_WaitingForTurn) {
+		MoveData move{ m_Player, x, y, z };
+		m_Client->SendNetworkMessage(NetworkMessage::createMoveMessage(move));
+		m_WaitingForTurn = false;
 		return true;
 	}
 	return false;
@@ -99,10 +100,10 @@ bool VoxelClient::SendMove(int x, int y, int z) {
 
 void VoxelClient::SetPlayerChoice(Player choice)
 {
-	player = choice;
-	waitingForPlayerChoice = false;
-	NetworkMessage choiceMsg = NetworkMessage::createPlayerChoiceMessage(player);
-	client->sendMessage(choiceMsg);
+	m_Player = choice;
+	m_WaitingForPlayerChoice = false;
+	NetworkMessage choiceMsg = NetworkMessage::createPlayerChoiceMessage(m_Player);
+	m_Client->SendNetworkMessage(choiceMsg);
 }
 
 void VoxelClient::handleGameState(const GameStateData& state)
@@ -112,17 +113,15 @@ void VoxelClient::handleGameState(const GameStateData& state)
 	bool stateChanged = false;
 
 	{
-		std::lock_guard<std::mutex> lock(stateMutex);
+		std::lock_guard<std::mutex> lock(m_StateMutex);
 		
-		// Track which chunks changed by comparing old and new state
-		// Don't clear here - let the rendering code clear after processing
-		if (hasState) {
+		if (m_HasState) {
 			// Compare boards and track changes
 			for (int x = 0; x < 3; ++x) {
 				for (int y = 0; y < 3; ++y) {
 					for (int z = 0; z < 3; ++z) {
-						if (lastState.board[x][y][z] != state.board[x][y][z]) {
-							updatedChunks.push_back(glm::vec3(x, y, z));
+						if (m_LastState.board[x][y][z] != state.board[x][y][z]) {
+							m_UpdatedChunks.push_back(glm::vec3(x, y, z));
 							stateChanged = true;
 						}
 					}
@@ -130,12 +129,12 @@ void VoxelClient::handleGameState(const GameStateData& state)
 			}
 		}
 		else {
-			// First state - mark all chunks as updated
+			// mark all chunks as updated
 			for (int x = 0; x < 3; ++x) {
 				for (int y = 0; y < 3; ++y) {
 					for (int z = 0; z < 3; ++z) {
 						if (state.board[x][y][z] != Player::NONE) {
-							updatedChunks.push_back(glm::vec3(x, y, z));
+							m_UpdatedChunks.push_back(glm::vec3(x, y, z));
 							stateChanged = true;
 						}
 					}
@@ -143,14 +142,13 @@ void VoxelClient::handleGameState(const GameStateData& state)
 			}
 		}
 		
-		lastState = state;
-		hasState = true;
-		waitingForTurn = (!state.game_over && state.current_turn == player);
+		m_LastState = state;
+		m_HasState = true;
+		m_WaitingForTurn = (!state.game_over && state.current_turn == m_Player);
 		isGameOver = state.game_over;
 		winner = state.winner;
 	}
 
-	// Notify callback if state changed (outside the lock to avoid deadlock)
 	if (stateChanged && onStateChangeCallback) {
 		onStateChangeCallback();
 	}
@@ -163,11 +161,11 @@ void VoxelClient::handleGameState(const GameStateData& state)
 		else {
 			std::cout << "Game over: " << (winner == Player::X ? "X" : "O") << " wins.\n";
 		}
-		running = false;
+		m_Running = false;
 		return;
 	}
 
-	if (waitingForTurn) {
+	if (m_WaitingForTurn) {
 		std::cout << "Your turn.\n";
 	}
 	else {
@@ -179,56 +177,67 @@ void VoxelClient::handleGameState(const GameStateData& state)
 
 void VoxelClient::StartGameLoop()
 {
-	running = true;
-	while (running) {
-		if (!connected) {
-			std::cout << "Server disconnected. Exiting client.\n";
-			break;
-		}
+#ifndef __EMSCRIPTEN__
+    m_Running = true;
+    while (m_Running) {
+        if (!m_Connected) {
+            std::cout << "Server disconnected. Exiting client.\n";
+            break;
+        }
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
-	// No longer running
-	if (connected) {
-		client->disconnect();
-	}
+    // No longer running
+    if (m_Connected) {
+        m_Client->Disconnect();
+    }
+#else
+    // Web build
+    m_Running = false;
+#endif
 }
 
 void VoxelClient::StopGameLoop()
 {
-	running = false;
+    m_Running = false;
 }
 
-bool VoxelClient::connectToServer(const std::string & uri)
+bool VoxelClient::connectToServer(const std::string& uri)
 {
-	try {
-		// Create new client socket ptr
-		client = std::make_unique<WebSocketClient>();
+    try {
+        // Create client socket ptr
+        m_Client = std::make_unique<WebSocketClient>();
 
-		client->setOnConnectCallback([this]() { onConnect(); });
-		client->setOnDisconnectCallback([this]() { onDisconnect(); });
-		client->setOnMessageCallback([this](const NetworkMessage& msg) { onMessage(msg); });
+        m_Client->SetOnConnectCallback([this]() { onConnect(); });
+        m_Client->SetOnDisconnectCallback([this]() { onDisconnect(); });
+        m_Client->SetOnMessageCallback([this](const NetworkMessage& msg) { onMessage(msg); });
 
-		client->connect(uri);
+        m_Client->Connect(uri);
 
-		// Wait for connection or timeout
-		int timeout = timeoutTime;
-		while (!connected && timeout > 0) {
-			std::cout << "Waiting for connection..." << std::endl;
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
-			timeout -= 500;
-		}
-		if (!connected) {
-			std::cerr << "Connection timed out." << std::endl;
-			return false;
-		}
+#ifdef __EMSCRIPTEN__
+        // Connection is async so return true to indicate connection initiated
+        std::cout << "Web build: Connection initiated asynchronously..." << std::endl;
+        return true;
+#else
+        // Wait for connection or timeout
+        int timeout = m_TimeoutTime;
+        while (!m_Connected && timeout > 0) {
+            std::cout << "Waiting for connection..." << std::endl;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            timeout -= 500;
+        }
+        if (!m_Connected) {
+            std::cerr << "Connection timed out." << std::endl;
+            return false;
+        }
 
-		std::cout << "Connected. Ready to set player choice from UI..." << std::endl;
-		return true;
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Error setting up connection: " << e.what() << std::endl;
-		return false;
-	}
+        std::cout << "Connected. Ready to set player choice from UI..." << std::endl;
+        return true;
+#endif
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error setting up connection: " << e.what() << std::endl;
+        return false;
+    }
 }

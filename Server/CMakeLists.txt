@@ -1,4 +1,4 @@
-﻿# CMakeList.txt : CMake project for Server
+﻿# CMakeList.txt : CMake for SERVER ONLY
 
 # Add source to this project's executable.
 file(GLOB_RECURSE SERVER_LINUX_SOURCES
